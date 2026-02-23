@@ -1,0 +1,109 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --primary: #3B82F6;
+    --primary-dark: #1D4ED8;
+    --color-dark-950: 7 9 13;
+    --color-dark-900: 15 17 22;
+    --color-dark-850: 21 25 33;
+    --color-dark-800: 30 37 48;
+    --color-dark-700: 45 54 67;
+    --color-dark-600: 63 75 91;
+    --color-text-primary: 255 255 255;
+    --color-text-secondary: 226 232 240;
+    --color-text-muted: 148 163 184;
+    --app-bg: #0F1116;
+    --app-text: #FFFFFF;
+  }
+
+  :root.light {
+    --color-dark-950: 226 232 240;
+    --color-dark-900: 241 245 249;
+    --color-dark-850: 248 250 252;
+    --color-dark-800: 255 255 255;
+    --color-dark-700: 226 232 240;
+    --color-dark-600: 203 213 225;
+    --color-text-primary: 15 23 42;
+    --color-text-secondary: 51 65 85;
+    --color-text-muted: 100 116 139;
+    --app-bg: #F4F7FB;
+    --app-text: #0F172A;
+  }
+
+  body {
+    @apply font-sans antialiased overflow-x-hidden;
+    background-color: var(--app-bg);
+    color: var(--app-text);
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0F1116;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2D3643;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3B82F6;
+}
+
+html.light ::-webkit-scrollbar-track {
+  background: #E2E8F0;
+}
+
+html.light ::-webkit-scrollbar-thumb {
+  background: #94A3B8;
+}
+
+/* Utility Classes */
+.glass-panel {
+  @apply bg-dark-800/40 backdrop-blur-xl border border-white/5 shadow-2xl;
+}
+
+.gradient-text {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-white via-blue-100 to-slate-400;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.animate-standard {
+  animation: standardIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes standardIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
