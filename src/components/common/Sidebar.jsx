@@ -49,8 +49,6 @@ const Sidebar = ({ className }) => {
             ]
         },
 
-        { path: '/management/blogs', label: 'Blogs', icon: FileText },
-
         { type: 'heading', label: 'Evaluation' },
         {
             label: 'Evaluation',
@@ -69,6 +67,10 @@ const Sidebar = ({ className }) => {
         { type: 'heading', label: 'Identity' },
         { path: '/dashboard/identity', label: 'Identity Hub', icon: Shield },
         { path: '/identity/overview', label: 'Center Data', icon: UserSquare },
+
+        { type: 'heading', label: 'Blogs' },
+        { path: '/management/blogs', label: 'Blogs', icon: FileText },
+
     ];
 
     // Auto-open menus if a child is active
@@ -81,7 +83,7 @@ const Sidebar = ({ className }) => {
     }, [location.pathname]);
 
     return (
-        <aside className={twMerge("fixed left-0 top-0 h-screen w-[23rem] bg-dark-850 border-r border-dark-600/30 flex flex-col z-50 text-text-secondary shadow-2xl transition-all duration-300", className)}>
+        <aside className={twMerge("fixed left-0 top-0 h-screen w-[23rem] bg-dark-850 border-r border-dark-600/30 flex flex-col z-50 text-text-secondary shadow-2xl transition-all duration-300 overflow-y-auto overflow-x-hidden", className)}>
             {/* Header/Logo */}
             <div className="p-8 pb-4 flex items-center gap-3 border-b border-dark-700/50">
                 <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary-dark rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
