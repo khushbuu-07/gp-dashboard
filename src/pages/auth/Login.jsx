@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Lock, Mail, Loader2, ArrowRight } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useLoginMutation } from '../../redux/api/authApiSlice';
@@ -7,9 +7,9 @@ import { useDispatch } from 'react-redux';
 import { loginSuccess } from '../../redux/slices/authSlice';
 
 const Login = () => {
-   const [email, setEmail] = useState('');
+   const [email, setEmail] = useState('maaz1@gmail.com');
    const [loginMutation, { isLoading }] = useLoginMutation();
-   const [password, setPassword] = useState('');
+   const [password, setPassword] = useState('Password@123');
     const [error, setError] = useState(null);
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -20,8 +20,8 @@ const Login = () => {
         setError(null);
 
         try {
-            const userData = await loginMutation({ email, password }).unwrap();
-            dispatch(loginSuccess({ ...userData }));
+            const response = await loginMutation({ email, password }).unwrap();
+            dispatch(loginSuccess(response.data));
             navigate('/');
         } catch (err) {
             console.error('Login error:', err);
@@ -127,7 +127,7 @@ const Login = () => {
                     </form>
 
                     <div className="mt-8 text-center text-sm text-text-muted">
-                        Don't have an account? <a href="#" className="text-primary font-bold hover:text-yellow hover:underline transition-colors">Create Account</a>
+                        Don't have an account? <Link to="/register" className="text-primary font-bold hover:text-yellow hover:underline transition-colors">Create Account</Link>
                     </div>
                 </div>
             </div>
