@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { MapPin, Server } from 'lucide-react';
+import Table from '../../components/common/Table';
 
 const Overview = () => {
     const centers = [
@@ -9,42 +10,69 @@ const Overview = () => {
         { id: 'CTR-004', name: 'Pune Tech', location: 'Pune, India', capacity: 400, status: 'Online', uptime: '99.8%' },
     ];
 
-    return (
-        <div className="space-y-6 pt-6 animate-fade-in text-text-primary">
-            <h1 className="text-3xl font-bold tracking-tight mb-6">Center Overview</h1>
-
-            <div className="grid grid-cols-1 gap-4">
-                {centers.map((center) => (
-                    <div key={center.id} className="bg-dark-800 p-6 rounded-2xl border border-dark-600/50 flex flex-col md:flex-row items-center justify-between hover:bg-dark-700/50 transition-all">
-                        <div className="flex items-center gap-6">
-                            <div className={`w-16 h-16 rounded-2xl flex items-center justify-center ${center.status === 'Online' ? 'bg-green-500/10 text-green-500' : 'bg-yellow-500/10 text-yellow-500'}`}>
-                                <Server className="w-8 h-8" />
-                            </div>
-                            <div>
-                                <h3 className="text-xl font-bold text-white">{center.name}</h3>
-                                <div className="flex items-center gap-4 mt-1 text-sm text-text-muted">
-                                    <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {center.location}</span>
-                                    <span className="w-1 h-1 bg-dark-600 rounded-full"></span>
-                                    <span>ID: {center.id}</span>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div className="flex items-center gap-8 mt-4 md:mt-0">
-                            <div className="text-center">
-                                <p className="text-xs text-text-muted uppercase tracking-wider font-bold">Capacity</p>
-                                <p className="text-lg font-bold text-white">{center.capacity}</p>
-                            </div>
-                            <div className="text-center">
-                                <p className="text-xs text-text-muted uppercase tracking-wider font-bold">Uptime</p>
-                                <p className="text-lg font-bold text-primary">{center.uptime}</p>
-                            </div>
-                            <div className={`px-4 py-2 rounded-lg text-xs font-bold uppercase tracking-widest border ${center.status === 'Online' ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'}`}>
-                                {center.status}
-                            </div>
-                        </div>
+    const columnDefs = useMemo(() => [
+        {
+            headerName: 'Center Name',
+            field: 'name',
+            flex: 1.5,
+            cellRenderer: (params) => (
+                <div className="flex items-center gap-3">
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${params.data.status === 'Online' ? 'bg-green-500/10 text-green-500' : 'bg-yellow-500/10 text-yellow-500'}`}>
+                        <Server className="w-4 h-4" />
                     </div>
-                ))}
+                    <div>
+                        <span className="font-bold text-text-primary block leading-tight">{params.value}</span>
+                        <span className="text-[10px] text-text-muted font-mono">ID: {params.data.id}</span>
+                    </div>
+                </div>
+            )
+        },
+        {
+            headerName: 'Location',
+            field: 'location',
+            flex: 1,
+            cellRenderer: (params) => (
+                <div className="flex items-center gap-2 text-text-muted">
+                    <MapPin className="w-3.5 h-3.5" />
+                    <span className="text-sm">{params.value}</span>
+                </div>
+            )
+        },
+        {
+            headerName: 'Capacity',
+            field: 'capacity',
+            width: 120,
+            cellRenderer: (params) => <span className="font-bold text-text-primary">{params.value} Seats</span>
+        },
+        {
+            headerName: 'Uptime',
+            field: 'uptime',
+            width: 120,
+            cellRenderer: (params) => <span className="font-mono text-primary font-bold">{params.value}</span>
+        },
+        {
+            headerName: 'Status',
+            field: 'status',
+            width: 140,
+            cellRenderer: (params) => (
+                <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border ${params.value === 'Online' ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20'}`}>
+                    {params.value}
+                </span>
+            )
+        }
+    ], []);
+
+    return (
+        <div className="space-y-6 pt-6 animate-fade-in text-text-primary h-[calc(100vh-6rem)] flex flex-col">
+            <div className="flex justify-between items-end border-b border-dark-600 pb-6 shrink-0">
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight mb-2">Center Overview</h1>
+                    <p className="text-text-muted text-sm">Real-time status of global operational centers.</p>
+                </div>
+            </div>
+
+            <div className="flex-1 min-h-0">
+                <Table rowData={centers} columnDefs={columnDefs} />
             </div>
         </div>
     );
