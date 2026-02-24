@@ -3,16 +3,33 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import MainLayout from './components/layout/MainLayout';
 import Login from './pages/auth/Login';
+import ProtectedRoute from './ProtectedRoute';
 
-// Lazy load pages for performance
-const Dashboard = lazy(() => import('./pages/dashboard/Dashboard'));
-const Projects = lazy(() => import('./pages/projects/Projects'));
-const AllProjects = lazy(() => import('./pages/projects/AllProjects'));
-const Blogs = lazy(() => import('./pages/blogs/Blogs'));
+//  DASHBOARDS
+const UnifiedDashboard = lazy(() => import('./pages/dashboard/UnifiedDashboard'));
+const ManagementDashboard = lazy(() => import('./pages/dashboard/Dashboard'));
+const EvaluationDashboard = lazy(() => import('./pages/dashboard/evaluation/EvaluationDashboard'));
+const IdentityDashboard = lazy(() => import('./pages/dashboard/IdentityHub/IdentityDashboard'));
+
+//  MANAGEMENT
+const Projects = lazy(() => import('./pages/adminmanagement/projects/Projects'));
+const AllProjects = lazy(() => import('./pages/adminmanagement/projects/AllProjects'));
+const Blogs = lazy(() => import('./pages/adminmanagement/blogs/Blogs'));
+const ClientsData = lazy(() => import('./pages/adminmanagement/clients/ClientsData'));
+const ClientQueries = lazy(() => import('./pages/adminmanagement/queries/ClientQueries'));
+const ClientCallbackData = lazy(() => import('./pages/adminmanagement/callback/ClientCallbackData'));
 const Tables = lazy(() => import('./components/tables/Tables'));
-const ClientQueries = lazy(() => import('./pages/queries/ClientQueries'));
-const ClientsData = lazy(() => import('./pages/clients/ClientsData'));
-const ClientCallbackData = lazy(() => import('./pages/callback/ClientCallbackData'));
+
+//  EVALUATION
+const AgentEvaluation = lazy(() => import('./pages/evaluation/AgentEvaluation'));
+const TLEvaluation = lazy(() => import('./pages/evaluation/TLEvaluation'));
+const QAEvaluation = lazy(() => import('./pages/evaluation/QAEvaluation'));
+const CenterEvaluation = lazy(() => import('./pages/evaluation/CenterEvaluation'));
+const ManageAdmin = lazy(() => import('./pages/evaluation/ManageAdmin'));
+const Charts = lazy(() => import('./pages/evaluation/Charts'));
+
+//  IDENTITY
+const Overview = lazy(() => import('./pages/identity/Overview'));
 
 const Loading = () => (
   <div className="flex h-screen w-full items-center justify-center bg-dark-900">
@@ -25,21 +42,44 @@ function App() {
     <AuthProvider>
       <Suspense fallback={<Loading />}>
         <Routes>
+          {/* AUTH */}
           <Route path="/login" element={<Login />} />
 
-          {/* Protected Routes wrapped in MainLayout */}
-          <Route path="/" element={<MainLayout />}>
-            <Route index element={<Dashboard />} />
-            <Route path="clients-data" element={<ClientsData />} />
-            <Route path="blogs" element={<Blogs />} />
-            <Route path="all-projects" element={<AllProjects />} />
-            <Route path="tables" element={<Tables />} />
-            <Route path="client-callback-data" element={<ClientCallbackData />} />
-            <Route path="queries" element={<ClientQueries />} />
-            <Route path="projects" element={<Projects />} />
+          {/* PROTECTED ROUTES */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/" element={<MainLayout />}>
+              {/* DEFAULT REDIRECT */}
+              <Route index element={<Navigate to="/dashboard/overview" replace />} />
 
-            {/* Fallback for undefined routes */}
-            <Route path="*" element={<Navigate to="/" replace />} />
+              {/* DASHBOARDS */}
+              <Route path="dashboard/overview" element={<UnifiedDashboard />} />
+              <Route path="dashboard/management" element={<ManagementDashboard />} />
+              <Route path="dashboard/evaluation" element={<EvaluationDashboard />} />
+              <Route path="dashboard/identity" element={<IdentityDashboard />} />
+
+              {/* MANAGEMENT */}
+              <Route path="management/blogs" element={<Blogs />} />
+              <Route path="management/clients" element={<ClientsData />} />
+              <Route path="management/projects" element={<Projects />} />
+              <Route path="management/all-projects" element={<AllProjects />} />
+              <Route path="management/queries" element={<ClientQueries />} />
+              <Route path="management/callback" element={<ClientCallbackData />} />
+              <Route path="management/tables" element={<Tables />} />
+
+              {/* EVALUATION */}
+              <Route path="evaluation/agent" element={<AgentEvaluation />} />
+              <Route path="evaluation/tl" element={<TLEvaluation />} />
+              <Route path="evaluation/qa" element={<QAEvaluation />} />
+              <Route path="evaluation/center" element={<CenterEvaluation />} />
+              <Route path="evaluation/admin" element={<ManageAdmin />} />
+              <Route path="evaluation/charts" element={<Charts />} />
+
+              {/* IDENTITY */}
+              <Route path="identity/overview" element={<Overview />} />
+
+              {/* FALLBACK */}
+              <Route path="*" element={<Navigate to="/dashboard/management" replace />} />
+            </Route>
           </Route>
         </Routes>
       </Suspense>

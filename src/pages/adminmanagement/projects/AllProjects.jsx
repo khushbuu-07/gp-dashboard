@@ -80,7 +80,7 @@ const AllProjects = () => {
     };
 
     return (
-        <div className="space-y-6 pt-6 animate-fade-in font-sans text-text-primary">
+        <div className="space-y-6 pt-6 animate-fade-in text-text-primary">
             <div className="bg-dark-800/80 border border-dark-600 rounded-2xl p-4 flex flex-col lg:flex-row lg:items-center gap-4 justify-between">
                 <h1 className="text-4xl font-extrabold tracking-tight">All Projects</h1>
                 <div className="flex flex-wrap items-center gap-2">

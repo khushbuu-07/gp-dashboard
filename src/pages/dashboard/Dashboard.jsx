@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend, PieChart, Pie, Cell } from 'recharts';
 import { ArrowUpRight, ArrowDownRight, Wallet, Activity, CreditCard, RefreshCw, MoreHorizontal, Users, Briefcase, TrendingUp, ChevronDown, FileText, Phone } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
@@ -29,7 +29,7 @@ const Dashboard = () => {
     ];
 
     return (
-        <div className="space-y-6 pt-6 animate-fade-in font-sans text-text-primary">
+        <div className="space-y-6 pt-6 animate-fade-in text-text-primary">
 
             {/* Top Header */}
             <div className="flex justify-between items-end pb-2">
@@ -66,7 +66,7 @@ const Dashboard = () => {
                         </div>
 
                         <div className="mb-6 z-10 relative">
-                            <p className="text-4xl font-bold text-text-primary tracking-tight mb-2">₹25,58,000</p>
+                            <p className="text-2xl font-bold text-text-primary tracking-tight mb-2">₹25,58,000</p>
                             <div className="flex items-center gap-2">
                                 <span className="text-xs font-bold text-yellow bg-yellow/10 px-2 py-1 rounded border border-yellow/30">
                                     <TrendingUp className="w-3 h-3 inline mr-1" /> +18.5%
@@ -228,4 +228,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-

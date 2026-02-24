@@ -1,50 +1,31 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { Lock, User, Loader2, ArrowRight } from 'lucide-react';
+import { Lock, Mail, Loader2, ArrowRight } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
 import { useLoginMutation } from '../../redux/api/authApiSlice';
 import { useDispatch } from 'react-redux';
 import { loginSuccess } from '../../redux/slices/authSlice';
 
 const Login = () => {
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
-    const [loading, setLoading] = useState(false);
+   const [email, setEmail] = useState('');
+   const [loginMutation, { isLoading }] = useLoginMutation();
+   const [password, setPassword] = useState('');
     const [error, setError] = useState(null);
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const [loginMutation] = useLoginMutation();
-
+   
+    
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true);
         setError(null);
 
         try {
-            const response = await loginMutation({ username, password }).unwrap();
-
-            console.log('Login response:', response);
-        
-            // Assuming the API returns the user data and token in the response
-            // The structure might depend on the backend implementation
-            if (response.success || response.token) {
-                const userData = response.data || response.user || { username };
-                const token = response.token;
-
-                const finalUserData = { ...userData, token };
-                
-
-                dispatch(loginSuccess(finalUserData));
-                navigate('/');
-            } else {
-                setError(response.message || 'Invalid credentials');
-            }
+            const userData = await loginMutation({ email, password }).unwrap();
+            dispatch(loginSuccess({ ...userData }));
+            navigate('/');
         } catch (err) {
             console.error('Login error:', err);
-            setError(err.data?.message || 'Failed to login. Please check your credentials.');
-        } finally {
-            setLoading(false);
+            setError(err?.data?.message || 'Failed to login. Please check your credentials.');
         }
     };
 
@@ -83,15 +64,15 @@ const Login = () => {
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-text-secondary ml-1">Username</label>
+                            <label className="text-sm font-medium text-text-secondary ml-1">Email Address</label>
                             <div className="relative group">
-                                <User className="absolute left-4 top-3.5 h-5 w-5 text-text-muted group-focus-within:text-primary transition-colors" />
+                                <Mail className="absolute left-4 top-3.5 h-5 w-5 text-text-muted group-focus-within:text-primary transition-colors" />
                                 <input
-                                    type="text"
+                                    type="email"
                                     required
-                                    value={username}
-                                    onChange={(e) => setUsername(e.target.value)}
-                                    placeholder="Enter your username"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    placeholder="Enter your email"
                                     className="w-full pl-11 pr-4 py-3 bg-dark-900 border border-dark-600 rounded-xl focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all outline-none placeholder:text-text-muted font-medium text-text-primary"
                                 />
                             </div>
@@ -129,13 +110,13 @@ const Login = () => {
 
                         <button
                             type="submit"
-                            disabled={loading}
+                            disabled={isLoading}
                             className={twMerge(
                                 "w-full py-3.5 px-4 bg-primary hover:bg-primary-dark text-white rounded-xl font-bold transition-all duration-300 shadow-lg shadow-primary/30 hover:shadow-primary/40 flex items-center justify-center gap-2 transform active:scale-95",
-                                loading && "opacity-80 cursor-not-allowed"
+                                isLoading && "opacity-80 cursor-not-allowed"
                             )}
                         >
-                            {loading ? (
+                            {isLoading ? (
                                 <Loader2 className="w-5 h-5 animate-spin" />
                             ) : (
                                 <>
@@ -155,4 +136,3 @@ const Login = () => {
 };
 
 export default Login;
-

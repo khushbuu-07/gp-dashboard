@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Search, ChevronDown, Plus, Filter, LayoutGrid, List, TrendingUp } from 'lucide-react';
 import { twMerge } from 'tailwind-merge';
-import Table from '../../components/common/Table';
+import Table from '../../../components/common/Table';
 
 const Projects = () => {
     const [viewMode, setViewMode] = useState('grid');
@@ -81,8 +81,7 @@ const Projects = () => {
     ]), []);
 
     return (
-        <div className="space-y-8 animate-fade-in font-sans text-text-primary pt-6">
-            {/* Header */}
+        <div className="space-y-8 animate-fade-in text-text-primary pt-6">
             <div className="flex flex-col md:flex-row justify-between items-end gap-6 border-b border-dark-600 pb-6">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight mb-2">Projects</h1>
@@ -262,4 +261,3 @@ const Projects = () => {
 };
 
 export default Projects;
-

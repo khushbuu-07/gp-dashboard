@@ -1,26 +1,46 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, FileText, Table, Phone, Briefcase, Users, FolderOpen, PhoneCall, LogOut, Hexagon, Zap } from 'lucide-react';
+import { NavLink, useLocation } from 'react-router-dom';
+import {
+    LayoutDashboard, FileText, Table, Phone, Briefcase, Users, FolderOpen, PhoneCall, LogOut, Hexagon, Zap,
+    BarChart2, Shield, PieChart, UserSquare, UserCheck, UserCog, ClipboardCheck, Building2, Settings, Activity
+} from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { twMerge } from 'tailwind-merge';
 
 const Sidebar = () => {
     const { logout } = useAuth();
+    const location = useLocation();
 
-    // Sidebar items matching the requested structure
-    const items = [
-        { path: '/', label: 'DASHBOARD', icon: LayoutDashboard },
-        { path: '/blogs', label: 'BLOGS', icon: FileText },
-        { path: '/all-projects', label: 'ALL PROJECTS', icon: FolderOpen },
-        { path: '/clients-data', label: 'CLIENT DATA', icon: Users },
-        { path: '/tables', label: 'CLIENT MANAGEMENT', icon: Table },
-        { path: '/client-callback-data', label: 'CLIENT CALLBACK DATA', icon: PhoneCall },
-        { path: '/queries', label: 'CLIENT QUERY', icon: Phone },
-        { path: '/projects', label: 'MANAGE PROJECTS', icon: Briefcase },
+    const navItems = [
+        { type: 'heading', label: 'Main' },
+        { path: '/dashboard/overview', label: 'Unified Overview', icon: Activity },
+
+        { type: 'heading', label: 'Management' },
+        { path: '/dashboard/management', label: 'Dashboard', icon: LayoutDashboard },
+        { path: '/management/projects', label: 'Manage Projects', icon: Briefcase },
+        { path: '/management/all-projects', label: 'All Projects', icon: FolderOpen },
+        { path: '/management/clients', label: 'Client Data', icon: Users },
+        { path: '/management/queries', label: 'Client Queries', icon: Phone },
+        { path: '/management/callback', label: 'Callback Data', icon: PhoneCall },
+        { path: '/management/blogs', label: 'Blogs', icon: FileText },
+        { path: '/management/tables', label: 'Client Management', icon: Table },
+
+        { type: 'heading', label: 'Evaluation' },
+        { path: '/dashboard/evaluation', label: 'Evaluation Dashboard', icon: BarChart2 },
+        { path: '/evaluation/agent', label: 'Agent Evaluation', icon: UserCheck },
+        { path: '/evaluation/tl', label: 'TL Evaluation', icon: UserCog },
+        { path: '/evaluation/qa', label: 'QA Evaluation', icon: ClipboardCheck },
+        { path: '/evaluation/center', label: 'Center Evaluation', icon: Building2 },
+        { path: '/evaluation/admin', label: 'Manage Admin', icon: Settings },
+        { path: '/evaluation/charts', label: 'Chart View', icon: PieChart },
+
+        { type: 'heading', label: 'Identity' },
+        { path: '/dashboard/identity', label: 'Identity Hub', icon: Shield },
+        { path: '/identity/overview', label: 'Center Data', icon: UserSquare },
     ];
 
     return (
-        <aside className="fixed left-0 top-0 h-screen w-72 bg-dark-850 border-r border-dark-600/30 flex flex-col z-50 text-text-secondary font-sans shadow-2xl">
+        <aside className="fixed left-0 top-0 h-screen w-72 bg-dark-850 border-r border-dark-600/30 flex flex-col z-50 text-text-secondary shadow-2xl">
             {/* Header/Logo */}
             <div className="p-8 pb-4 flex items-center gap-3 border-b border-dark-700/50">
                 <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary-dark rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
@@ -37,32 +57,49 @@ const Sidebar = () => {
             </div>
 
             {/* Navigation */}
-            <nav className="flex-1 overflow-y-auto py-8 px-4 space-y-2">
-                <div className="px-4 mb-9 text-[18px] font-bold text-text-primary uppercase tracking-[0.4em]">Main Menu</div>
-                {items.map((item) => (
-                    <NavLink
-                        key={item.path}
-                        to={item.path}
-                        className={({ isActive }) =>
-                            twMerge(
-                                "flex items-center gap-4 px-4 py-3.5 text-[13px] font-bold uppercase tracking-widest rounded-xl transition-all duration-300 group relative",
-                                isActive
-                                    ? "bg-primary/10 text-primary border border-primary/20 shadow-inner shadow-primary/5"
-                                    : "text-text-secondary hover:bg-dark-700 hover:text-text-primary"
-                            )
-                        }
-                    >
-                        {({ isActive }) => (
-                            <>
-                                <item.icon className={twMerge("w-4.5 h-4.5 transition-transform duration-300", isActive ? "scale-110 text-primary" : "group-hover:scale-110 group-hover:text-primary")} />
-                                <span>{item.label}</span>
-                                {isActive && (
-                                    <div className="ml-auto w-1 h-4 bg-primary rounded-full shadow-[0_0_8px_rgba(59,130,246,0.6)]" />
-                                )}
-                            </>
-                        )}
-                    </NavLink>
-                ))}
+            <nav className="flex-1 overflow-y-auto py-8 px-4 space-y-1">
+                {navItems.map((item, index) => {
+                    if (item.type === 'heading') {
+                        const isActive = 
+                            (item.label === 'Main' && location.pathname.includes('/dashboard/overview')) ||
+                            (item.label === 'Management' && (location.pathname.includes('/management') || location.pathname.includes('/dashboard/management'))) ||
+                            (item.label === 'Evaluation' && (location.pathname.includes('/evaluation') || location.pathname.includes('/dashboard/evaluation'))) ||
+                            (item.label === 'Identity' && (location.pathname.includes('/identity') || location.pathname.includes('/dashboard/identity')));
+
+                        return (
+                            <div key={index} className="px-4 pt-6 pb-2 flex items-center gap-2">
+                                {isActive && <div className="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_8px_rgba(59,130,246,0.8)] animate-pulse" />}
+                                <h3 className={twMerge("text-[10px] font-bold uppercase tracking-[0.2em] transition-colors duration-300", isActive ? "text-primary" : "text-text-muted")}>
+                                    {item.label}
+                                </h3>
+                            </div>
+                        );
+                    }
+                    return (
+                        <NavLink
+                            key={item.path}
+                            to={item.path}
+                            className={({ isActive }) =>
+                                twMerge(
+                                    "flex items-center gap-4 px-4 py-3.5 text-[13px] font-bold uppercase tracking-widest rounded-xl transition-all duration-300 group relative",
+                                    isActive
+                                        ? "bg-primary/10 text-primary border border-primary/20 shadow-inner shadow-primary/5"
+                                        : "text-text-secondary hover:bg-dark-700 hover:text-text-primary"
+                                )
+                            }
+                        >
+                            {({ isActive }) => (
+                                <>
+                                    <item.icon className={twMerge("w-4.5 h-4.5 transition-transform duration-300", isActive ? "scale-110 text-primary" : "group-hover:scale-110 group-hover:text-primary")} />
+                                    <span>{item.label}</span>
+                                    {isActive && (
+                                        <div className="ml-auto w-1 h-4 bg-primary rounded-full shadow-[0_0_8px_rgba(59,130,246,0.6)]" />
+                                    )}
+                                </>
+                            )}
+                        </NavLink>
+                    );
+                })}
 
                 {/* Live Stats Promo */}
                 <div className="mt-[20px] mx-2 bg-dark-800/50 p-5 rounded-2xl border border-dark-700/50 relative overflow-hidden group">
@@ -95,4 +132,3 @@ const Sidebar = () => {
 };
 
 export default Sidebar;
-
