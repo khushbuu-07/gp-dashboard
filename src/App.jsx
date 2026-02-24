@@ -50,7 +50,7 @@ function App() {
           {/* <Route path="/register" element={<Register />} /> */}
 
           {/* PROTECTED ROUTES */}
-          <Route>
+          <Route element={<ProtectedRoute />}>
             <Route path="/" element={<MainLayout />}>
               {/* DEFAULT REDIRECT */}
               <Route index element={<Navigate to="/dashboard/overview" replace />} />
