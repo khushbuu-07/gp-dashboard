@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import MainLayout from './components/layout/MainLayout';
 import Login from './pages/auth/Login';
+import Register from './pages/auth/Register';
 import ProtectedRoute from './ProtectedRoute';
 
 //  DASHBOARDS
@@ -44,6 +45,7 @@ function App() {
         <Routes>
           {/* AUTH */}
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
 
           {/* PROTECTED ROUTES */}
           <Route element={<ProtectedRoute />}>
