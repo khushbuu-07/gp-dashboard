@@ -7,9 +7,9 @@ import { useDispatch } from 'react-redux';
 import { loginSuccess } from '../../redux/slices/authSlice';
 
 const Login = () => {
-   const [email, setEmail] = useState('neetesh@gmail.com');
+   const [email, setEmail] = useState('maaz1@gmail.com');
    const [loginMutation, { isLoading }] = useLoginMutation();
-   const [password, setPassword] = useState('12345678');
+   const [password, setPassword] = useState('Password@123');
     const [error, setError] = useState(null);
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -20,8 +20,8 @@ const Login = () => {
         setError(null);
 
         try {
-            const userData = await loginMutation({ email, password }).unwrap();
-            dispatch(loginSuccess({ ...userData }));
+            const response = await loginMutation({ email, password }).unwrap();
+            dispatch(loginSuccess(response.data));
             navigate('/');
         } catch (err) {
             console.error('Login error:', err);
