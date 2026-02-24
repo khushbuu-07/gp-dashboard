@@ -144,7 +144,7 @@ const ClientManagement = () => {
     ];
 
     return (
-        <div className="space-y-8 pt-6 animate-fade-in font-sans h-[calc(100vh-8rem)] flex flex-col pb-10">
+        <div className="space-y-8 pt-6 animate-fade-in h-[calc(100vh-8rem)] flex flex-col pb-10">
             {/* Header Content */}
             <div className="flex justify-between items-end px-4 border-b border-white/5 pb-8">
                 <div>
@@ -174,4 +174,3 @@ const ClientManagement = () => {
 };
 
 export default ClientManagement;
-

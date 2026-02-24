@@ -2,6 +2,7 @@ import React, { createContext, useContext } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout as logoutAction } from '../redux/slices/authSlice';
 
+
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {

@@ -3,7 +3,7 @@ import {
     Calendar, User, Clock, ArrowRight, Share2,
     Heart, MessageCircle, Tag, TrendingUp
 } from 'lucide-react';
-import { twMerge } from 'tailwind-merge';
+
 
 const Blogs = () => {
     // Professional Outsourcing/Project Management Blog Data
@@ -52,7 +52,7 @@ const Blogs = () => {
     const recentPosts = posts.slice(1);
 
     return (
-        <div className="space-y-12 animate-fade-in font-sans text-text-primary pt-6 pb-20">
+        <div className="space-y-12 animate-fade-in text-text-primary pt-6 pb-20">
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-end border-b border-dark-600/50 pb-8">
                 <div>
@@ -178,4 +178,3 @@ const Blogs = () => {
 };
 
 export default Blogs;
-
