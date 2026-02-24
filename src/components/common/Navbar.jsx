@@ -46,7 +46,7 @@ const Navbar = () => {
     }, []);
 
     return (
-        <nav className="fixed top-0 left-0 right-0 h-20 z-40 pl-72 transition-all duration-300 pointer-events-none bg-transparent">
+        <nav className="fixed top-0 left-0 right-0 h-20 z-40 md:pl-[23rem] transition-all duration-300 pointer-events-none bg-transparent">
             <div className="h-full w-full px-8 flex items-center justify-between pointer-events-auto backdrop-blur-md bg-dark-900/90 border-b border-dark-600/50 shadow-lg [.light_&]:bg-white/90 [.light_&]:border-slate-200">
 
                 {/* Enhanced Search - Pill Style */}

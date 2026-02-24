@@ -26,10 +26,10 @@ const MainLayout = () => {
 
             <div className="flex pt-20">
                 {/* Sidebar fixed at left (or right if requested, currently left based on image) */}
-                <Sidebar className="w-72 hidden md:block" />
+                <Sidebar className="w-[23rem] hidden md:block" />
 
                 {/* Main Content Area */}
-                <main className="flex-1 ml-72 p-8 min-h-[calc(100vh-5rem)] overflow-y-auto transition-all duration-300">
+                <main className="flex-1 md:ml-[23rem] p-8 min-h-[calc(100vh-5rem)] overflow-y-auto transition-all duration-300">
                     {/* 'ml-72' aligns content with the 72 (18rem/288px) sidebar width */}
                     <div className="max-w-8xl mx-auto space-y-6 animate-slide-in">
                         <Outlet />

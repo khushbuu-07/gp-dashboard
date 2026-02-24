@@ -44,6 +44,8 @@ export default {
         'fade-in': 'fadeIn 0.5s ease-out',
         'slide-up': 'slideUp 0.5s ease-out',
       },
+      spacing: {
+      },
       keyframes: {
         fadeIn: {
           '0%': { opacity: '0' },

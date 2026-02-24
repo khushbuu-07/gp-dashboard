@@ -2,45 +2,86 @@ import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import {
     LayoutDashboard, FileText, Table, Phone, Briefcase, Users, FolderOpen, PhoneCall, LogOut, Hexagon, Zap,
-    BarChart2, Shield, PieChart, UserSquare, UserCheck, UserCog, ClipboardCheck, Building2, Settings, Activity
+    BarChart2, Shield, PieChart, UserSquare, UserCheck, UserCog, ClipboardCheck, Building2, Settings, Activity,
+    ChevronDown, ChevronRight, CreditCard, History
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { twMerge } from 'tailwind-merge';
 
-const Sidebar = () => {
+const Sidebar = ({ className }) => {
     const { logout } = useAuth();
     const location = useLocation();
+    const [openMenus, setOpenMenus] = React.useState({});
+
+    const toggleMenu = (label) => {
+        setOpenMenus(prev => ({
+            ...prev,
+            [label]: !prev[label]
+        }));
+    };
 
     const navItems = [
         { type: 'heading', label: 'Main' },
         { path: '/dashboard/overview', label: 'Unified Overview', icon: Activity },
 
         { type: 'heading', label: 'Management' },
-        { path: '/dashboard/management', label: 'Dashboard', icon: LayoutDashboard },
-        { path: '/management/projects', label: 'Manage Projects', icon: Briefcase },
-        { path: '/management/all-projects', label: 'All Projects', icon: FolderOpen },
-        { path: '/management/clients', label: 'Client Data', icon: Users },
-        { path: '/management/queries', label: 'Client Queries', icon: Phone },
-        { path: '/management/callback', label: 'Callback Data', icon: PhoneCall },
+        // { path: '/dashboard/management', label: 'Dashboard', icon: LayoutDashboard },
+
+        {
+            label: 'Project Management',
+            icon: Briefcase,
+            subItems: [
+                { path: '/management/projects', label: 'Manage Projects', icon: Briefcase },
+                { path: '/management/all-projects', label: 'All Projects', icon: FolderOpen },
+            ]
+        },
+
+        {
+            label: 'Client Management',
+            icon: Users,
+            subItems: [
+                { path: '/management/clients', label: 'Client Data', icon: Users },
+                { path: '/management/queries', label: 'Client Queries', icon: Phone },
+                { path: '/management/callback', label: 'Callback Data', icon: PhoneCall },
+                { path: '/management/tables', label: 'Client Management', icon: Table },
+                { path: '/management/billing/generate', label: 'Bill Generate', icon: CreditCard },
+                { path: '/management/billing/history', label: 'Invoice History', icon: History },
+            ]
+        },
+
         { path: '/management/blogs', label: 'Blogs', icon: FileText },
-        { path: '/management/tables', label: 'Client Management', icon: Table },
 
         { type: 'heading', label: 'Evaluation' },
-        { path: '/dashboard/evaluation', label: 'Evaluation Dashboard', icon: BarChart2 },
-        { path: '/evaluation/agent', label: 'Agent Evaluation', icon: UserCheck },
-        { path: '/evaluation/tl', label: 'TL Evaluation', icon: UserCog },
-        { path: '/evaluation/qa', label: 'QA Evaluation', icon: ClipboardCheck },
-        { path: '/evaluation/center', label: 'Center Evaluation', icon: Building2 },
-        { path: '/evaluation/admin', label: 'Manage Admin', icon: Settings },
-        { path: '/evaluation/charts', label: 'Chart View', icon: PieChart },
+        {
+            label: 'Evaluation',
+            icon: BarChart2,
+            subItems: [
+                { path: '/dashboard/evaluation', label: 'Dashboard', icon: BarChart2 },
+                { path: '/evaluation/agent', label: 'Agent Evaluation', icon: UserCheck },
+                { path: '/evaluation/tl', label: 'TL Evaluation', icon: UserCog },
+                { path: '/evaluation/qa', label: 'QA Evaluation', icon: ClipboardCheck },
+                { path: '/evaluation/center', label: 'Center Evaluation', icon: Building2 },
+                { path: '/evaluation/admin', label: 'Manage Admin', icon: Settings },
+                { path: '/evaluation/charts', label: 'Chart View', icon: PieChart },
+            ]
+        },
 
         { type: 'heading', label: 'Identity' },
         { path: '/dashboard/identity', label: 'Identity Hub', icon: Shield },
         { path: '/identity/overview', label: 'Center Data', icon: UserSquare },
     ];
 
+    // Auto-open menus if a child is active
+    React.useEffect(() => {
+        navItems.forEach(item => {
+            if (item.subItems?.some(sub => location.pathname === sub.path)) {
+                setOpenMenus(prev => ({ ...prev, [item.label]: true }));
+            }
+        });
+    }, [location.pathname]);
+
     return (
-        <aside className="fixed left-0 top-0 h-screen w-72 bg-dark-850 border-r border-dark-600/30 flex flex-col z-50 text-text-secondary shadow-2xl">
+        <aside className={twMerge("fixed left-0 top-0 h-screen w-[23rem] bg-dark-850 border-r border-dark-600/30 flex flex-col z-50 text-text-secondary shadow-2xl transition-all duration-300", className)}>
             {/* Header/Logo */}
             <div className="p-8 pb-4 flex items-center gap-3 border-b border-dark-700/50">
                 <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary-dark rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
@@ -60,7 +101,7 @@ const Sidebar = () => {
             <nav className="flex-1 overflow-y-auto py-8 px-4 space-y-1">
                 {navItems.map((item, index) => {
                     if (item.type === 'heading') {
-                        const isActive = 
+                        const isActive =
                             (item.label === 'Main' && location.pathname.includes('/dashboard/overview')) ||
                             (item.label === 'Management' && (location.pathname.includes('/management') || location.pathname.includes('/dashboard/management'))) ||
                             (item.label === 'Evaluation' && (location.pathname.includes('/evaluation') || location.pathname.includes('/dashboard/evaluation'))) ||
@@ -75,6 +116,61 @@ const Sidebar = () => {
                             </div>
                         );
                     }
+
+                    if (item.subItems) {
+                        const isMenuOpen = openMenus[item.label];
+                        const isAnyChildActive = item.subItems.some(sub => location.pathname === sub.path);
+
+                        return (
+                            <div key={item.label} className="space-y-1">
+                                <button
+                                    onClick={() => toggleMenu(item.label)}
+                                    className={twMerge(
+                                        "w-full flex items-center gap-4 px-4 py-3.5 text-[13px] font-bold uppercase tracking-widest rounded-xl transition-all duration-300 group relative",
+                                        isAnyChildActive
+                                            ? "bg-primary/5 text-primary border border-primary/10"
+                                            : "text-text-secondary hover:bg-dark-700 hover:text-text-primary"
+                                    )}
+                                >
+                                    <item.icon className={twMerge("w-4.5 h-4.5 transition-transform duration-300", isAnyChildActive ? "scale-110 text-primary" : "group-hover:scale-110 group-hover:text-primary")} />
+                                    <span>{item.label}</span>
+                                    <div className="ml-auto flex items-center gap-2">
+                                        {isMenuOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                                    </div>
+                                </button>
+
+                                {isMenuOpen && (
+                                    <div className="ml-6 space-y-1 border-l border-dark-700/50 pl-2 transition-all duration-300 animate-standard">
+                                        {item.subItems.map((subItem) => (
+                                            <NavLink
+                                                key={subItem.path}
+                                                to={subItem.path}
+                                                className={({ isActive }) =>
+                                                    twMerge(
+                                                        "flex items-center gap-3 px-4 py-2.5 text-[11px] font-bold uppercase tracking-widest rounded-lg transition-all duration-300 group relative",
+                                                        isActive
+                                                            ? "text-primary bg-primary/5"
+                                                            : "text-text-muted hover:text-text-primary hover:bg-dark-700/50"
+                                                    )
+                                                }
+                                            >
+                                                {({ isActive }) => (
+                                                    <>
+                                                        <subItem.icon className={twMerge("w-3.5 h-3.5", isActive ? "text-primary" : "group-hover:text-primary")} />
+                                                        <span>{subItem.label}</span>
+                                                        {isActive && (
+                                                            <div className="ml-auto w-1 h-3 bg-primary rounded-full shadow-[0_0_8px_rgba(59,130,246,0.4)]" />
+                                                        )}
+                                                    </>
+                                                )}
+                                            </NavLink>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    }
+
                     return (
                         <NavLink
                             key={item.path}

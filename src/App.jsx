@@ -19,6 +19,8 @@ const ClientsData = lazy(() => import('./pages/adminmanagement/clients/ClientsDa
 const ClientQueries = lazy(() => import('./pages/adminmanagement/queries/ClientQueries'));
 const ClientCallbackData = lazy(() => import('./pages/adminmanagement/callback/ClientCallbackData'));
 const Tables = lazy(() => import('./components/tables/Tables'));
+const BillGenerate = lazy(() => import('./pages/adminmanagement/billing/BillGenerate'));
+const InvoiceHistory = lazy(() => import('./pages/adminmanagement/billing/InvoiceHistory'));
 
 //  EVALUATION
 const AgentEvaluation = lazy(() => import('./pages/evaluation/AgentEvaluation'));
@@ -46,7 +48,7 @@ function App() {
           <Route path="/login" element={<Login />} />
 
           {/* PROTECTED ROUTES */}
-          <Route element={<ProtectedRoute />}>
+          <Route>
             <Route path="/" element={<MainLayout />}>
               {/* DEFAULT REDIRECT */}
               <Route index element={<Navigate to="/dashboard/overview" replace />} />
@@ -65,6 +67,8 @@ function App() {
               <Route path="management/queries" element={<ClientQueries />} />
               <Route path="management/callback" element={<ClientCallbackData />} />
               <Route path="management/tables" element={<Tables />} />
+              <Route path="management/billing/generate" element={<BillGenerate />} />
+              <Route path="management/billing/history" element={<InvoiceHistory />} />
 
               {/* EVALUATION */}
               <Route path="evaluation/agent" element={<AgentEvaluation />} />
