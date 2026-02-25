@@ -1,96 +1,93 @@
-import { apiSlice } from './apiSlice';
+import { apiSlice } from "./apiSlice";
 
-const PROJECTS_URL = 'project'; // FIXED (singular)
+const PROJECTS_URL = "project";
 
 export const projectApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-
     getProjects: builder.query({
-      query: () => ({
+      query: ({ page = 1, limit = 1000, search = "", status = "" } = {}) => ({
         url: PROJECTS_URL,
+        params: { page, limit, search, status },
       }),
+      transformResponse: (response) => response,
       providesTags: (result) =>
-        result?.data
+        Array.isArray(result?.data)
           ? [
-              { type: 'Project', id: 'LIST' },
-              ...result.data.map((project) => ({
-                type: 'Project',
-                id: project._id,
-              })),
+              { type: "Project", id: "LIST" },
+              ...result.data.map((project) => ({ type: "Project", id: project._id })),
             ]
-          : [{ type: 'Project', id: 'LIST' }],
+          : [{ type: "Project", id: "LIST" }],
       keepUnusedDataFor: 5,
     }),
 
-    getProject: builder.query({
-      query: (projectId) => ({
-        url: `${PROJECTS_URL}/${projectId}`,
+    getProjectById: builder.query({
+      query: (id) => `${PROJECTS_URL}/${id}`,
+      transformResponse: (response) => response.data,
+      providesTags: (result, error, arg) => [{ type: "Project", id: result?._id || arg }],
+    }),
+
+    getPublicLiveProjects: builder.query({
+      query: ({ page = 1, limit = 1000 } = {}) => ({
+        url: `${PROJECTS_URL}/public/live`,
+        params: { page, limit },
       }),
-      providesTags: (result, error, arg) => [
-        { type: 'Project', id: arg },
-      ],
+      transformResponse: (response) => response,
+      providesTags: [{ type: "Project", id: "PUBLIC_LIVE" }],
     }),
 
     addProject: builder.mutation({
       query: (data) => ({
         url: PROJECTS_URL,
-        method: 'POST',
+        method: "POST",
         body: data,
       }),
-      invalidatesTags: [{ type: 'Project', id: 'LIST' }],
+      invalidatesTags: [{ type: "Project", id: "LIST" }, { type: "Project", id: "PUBLIC_LIVE" }],
     }),
 
     updateProject: builder.mutation({
       query: ({ _id, data }) => ({
         url: `${PROJECTS_URL}/${_id}`,
-        method: 'PUT',
+        method: "PUT",
         body: data,
       }),
-      invalidatesTags: (r, e, arg) => [
-        { type: 'Project', id: arg._id },
+      invalidatesTags: (result, error, arg) => [
+        { type: "Project", id: "LIST" },
+        { type: "Project", id: arg._id },
+        { type: "Project", id: "PUBLIC_LIVE" },
       ],
     }),
 
     deleteProject: builder.mutation({
-      query: (projectId) => ({
-        url: `${PROJECTS_URL}/${projectId}`,
-        method: 'DELETE',
-      }),
-      invalidatesTags: (r, e, arg) => [
-        { type: 'Project', id: arg },
-      ],
-    }),
-
-    updateProjectStatus: builder.mutation({
-      query: ({ id, status }) => ({
-        url: `${PROJECTS_URL}/${id}/status`,
-        method: 'PATCH',
-        body: { status },
-      }),
-      invalidatesTags: (r, e, arg) => [
-        { type: 'Project', id: arg.id },
-      ],
-    }),
-
-    toggleProjectFeature: builder.mutation({
       query: (id) => ({
-        url: `${PROJECTS_URL}/${id}/feature`,
-        method: 'PATCH',
+        url: `${PROJECTS_URL}/${id}`,
+        method: "DELETE",
       }),
-      invalidatesTags: (r, e, arg) => [
-        { type: 'Project', id: arg },
+      invalidatesTags: (result, error, arg) => [
+        { type: "Project", id: "LIST" },
+        { type: "Project", id: arg },
+        { type: "Project", id: "PUBLIC_LIVE" },
       ],
     }),
 
+    incrementProjectApplications: builder.mutation({
+      query: (id) => ({
+        url: `${PROJECTS_URL}/${id}/applications`,
+        method: "PATCH",
+      }),
+      invalidatesTags: (result, error, arg) => [
+        { type: "Project", id: "LIST" },
+        { type: "Project", id: arg },
+      ],
+    }),
   }),
 });
 
 export const {
   useGetProjectsQuery,
-  useGetProjectQuery,
+  useGetProjectByIdQuery,
+  useGetPublicLiveProjectsQuery,
   useAddProjectMutation,
   useUpdateProjectMutation,
   useDeleteProjectMutation,
-  useUpdateProjectStatusMutation,
-  useToggleProjectFeatureMutation,
+  useIncrementProjectApplicationsMutation,
 } = projectApiSlice;

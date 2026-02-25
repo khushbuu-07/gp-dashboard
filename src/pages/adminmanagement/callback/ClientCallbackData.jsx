@@ -12,6 +12,9 @@ const ClientCallbackData = () => {
     const [searchApplied, setSearchApplied] = useState("");
     const [isAddOpen, setIsAddOpen] = useState(false);
     const [formData, setFormData] = useState({ name: "", email: "", phone: "" });
+    const [isEditOpen, setIsEditOpen] = useState(false);
+    const [editingId, setEditingId] = useState(null);
+    const [editFormData, setEditFormData] = useState({ name: "", email: "", phone: "" });
     const { data, isLoading, isError, error, refetch } = useGetRequestCallsQuery({
         page: 1,
         limit: 1000,
@@ -65,12 +68,32 @@ const ClientCallbackData = () => {
         }
     };
 
-    const handleUpdateEmail = async (row) => {
-        const email = window.prompt("Update email", row.email || "");
-        if (!email) return;
+    const handleOpenEdit = (row) => {
+        setEditingId(row._id);
+        setEditFormData({
+            name: row.name || "",
+            email: row.email || "",
+            phone: row.phone || "",
+        });
+        setIsEditOpen(true);
+    };
+
+    const handleEditSubmit = async (e) => {
+        e.preventDefault();
+        if (!editingId) return;
         try {
-            await updateRequestCall({ id: row._id, data: { email } }).unwrap();
+            await updateRequestCall({
+                id: editingId,
+                data: {
+                    name: editFormData.name,
+                    email: editFormData.email,
+                    phone: editFormData.phone,
+                },
+            }).unwrap();
             refetch();
+            setIsEditOpen(false);
+            setEditingId(null);
+            setEditFormData({ name: "", email: "", phone: "" });
         } catch (err) {
             alert(err?.data?.message || "Failed to update request");
         }
@@ -123,6 +146,62 @@ const ClientCallbackData = () => {
                 </form>
             ) : null}
 
+            {isEditOpen ? (
+                <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+                    <div className="w-full max-w-lg bg-dark-900 border border-dark-600 rounded-2xl p-5">
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-lg font-bold text-text-primary">Edit Callback Request</h2>
+                            <button
+                                onClick={() => {
+                                    setIsEditOpen(false);
+                                    setEditingId(null);
+                                }}
+                                className="px-3 py-1.5 rounded-lg bg-dark-700 text-text-primary"
+                            >
+                                Close
+                            </button>
+                        </div>
+                        <form onSubmit={handleEditSubmit} className="grid grid-cols-1 gap-3">
+                            <input
+                                value={editFormData.name}
+                                onChange={(e) =>
+                                    setEditFormData((p) => ({ ...p, name: e.target.value }))
+                                }
+                                placeholder="Name"
+                                className="px-4 py-2.5 bg-dark-900 border border-dark-600 rounded-xl text-sm focus:outline-none focus:border-primary"
+                                required
+                            />
+                            <input
+                                type="email"
+                                value={editFormData.email}
+                                onChange={(e) =>
+                                    setEditFormData((p) => ({ ...p, email: e.target.value }))
+                                }
+                                placeholder="Email"
+                                className="px-4 py-2.5 bg-dark-900 border border-dark-600 rounded-xl text-sm focus:outline-none focus:border-primary"
+                                required
+                            />
+                            <input
+                                value={editFormData.phone}
+                                onChange={(e) =>
+                                    setEditFormData((p) => ({ ...p, phone: e.target.value }))
+                                }
+                                placeholder="Phone"
+                                className="px-4 py-2.5 bg-dark-900 border border-dark-600 rounded-xl text-sm focus:outline-none focus:border-primary"
+                                required
+                            />
+                            <button
+                                type="submit"
+                                disabled={isUpdating}
+                                className="px-5 py-2.5 rounded-xl bg-primary text-white font-bold disabled:opacity-60"
+                            >
+                                {isUpdating ? "Updating..." : "Update"}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            ) : null}
+
             <div className="bg-dark-900 border border-dark-600/60 rounded-2xl overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="min-w-[1200px] w-full text-sm">
@@ -172,7 +251,7 @@ const ClientCallbackData = () => {
                                                 <PhoneCall className="w-4 h-4" />
                                             </a>
                                             <button
-                                                onClick={() => handleUpdateEmail(row)}
+                                                onClick={() => handleOpenEdit(row)}
                                                 disabled={isUpdating}
                                                 className="p-2 rounded-lg bg-dark-700 border border-dark-600 text-text-muted hover:text-primary disabled:opacity-60"
                                             >
