@@ -52,7 +52,7 @@ export const SIDEBAR_CONFIG = [
     icon: Briefcase,
     section: "OPERATIONS",
     children: [
-      { key: "activeProjects", label: "Active Projects", path: "/operations/active", icon: Briefcase },
+      { key: "activeProjects", label: "Active Projects", path: "/management/projects", icon: Briefcase },
       { key: "archivedProjects", label: "Archived Projects", path: "/operations/archived", icon: Briefcase }
     ]
   },
