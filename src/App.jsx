@@ -5,6 +5,7 @@ import MainLayout from './components/layout/MainLayout';
 import Login from './pages/auth/Login';
 // import Register from './pages/auth/Register';
 import ProtectedRoute from './ProtectedRoute';
+import UserManagement from './pages/identity/UserManagement';
 
 //  DASHBOARDS
 const UnifiedDashboard = lazy(() => import('./pages/dashboard/UnifiedDashboard'));
@@ -39,7 +40,7 @@ const ManageAdmin = lazy(() => import('./pages/evaluation/ManageAdmin'));
 const Charts = lazy(() => import('./pages/evaluation/Charts'));
 
 //  IDENTITY
-const Overview = lazy(() => import('./pages/identity/Overview'));
+const Overview = lazy(() => import('./pages/identity/UserManagement'));
 
 const Loading = () => (
   <div className="flex h-screen w-full items-center justify-center bg-dark-900">
@@ -66,7 +67,7 @@ function App() {
               <Route path="dashboard/overview" element={<UnifiedDashboard />} />
               <Route path="dashboard/management" element={<ManagementDashboard />} />
               <Route path="dashboard/evaluation" element={<EvaluationDashboard />} />
-              <Route path="dashboard/identity" element={<IdentityDashboard />} />
+              <Route path="dashboard/identity" element={<UserManagement />} />
 
               {/* Sales */}
                 <Route path="sales/leads" element={<SalesLeads />} />
@@ -95,7 +96,7 @@ function App() {
               <Route path="evaluation/charts" element={<Charts />} />
 
               {/* IDENTITY */}
-              <Route path="identity/overview" element={<Overview />} />
+              <Route path="identity" element={<UserManagement />} />
 
               {/* FALLBACK */}
               <Route path="*" element={<Navigate to="/dashboard/management" replace />} />

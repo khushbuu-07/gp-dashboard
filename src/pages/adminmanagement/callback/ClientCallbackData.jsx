@@ -1,19 +1,42 @@
-import React, { useMemo, useState } from 'react';
-import { PhoneCall, Trash2 } from 'lucide-react';
-
-const initialRows = [
-    { id: 1, name: 'Rahul Sharma', email: 'rahul.sharma@gmail.com', phone: '9876543210', dateOfCalling: '21/2/2026', remarks: 'Requested callback at 5 PM' },
-    { id: 2, name: 'Sneha Verma', email: 'sneha.verma@outlook.com', phone: '9865032147', dateOfCalling: '20/2/2026', remarks: 'Wants pricing details' },
-    { id: 3, name: 'Amit Kumar', email: 'amit.kumar@yahoo.com', phone: '9123456789', dateOfCalling: '19/2/2026', remarks: 'Interested in chat process' },
-    { id: 4, name: 'Pooja Singh', email: 'pooja.singh@gmail.com', phone: '9988123456', dateOfCalling: '18/2/2026', remarks: 'Asked for documents list' },
-    { id: 5, name: 'Imran Ali', email: 'imran.ali@mail.com', phone: '9011223344', dateOfCalling: '17/2/2026', remarks: 'Follow-up required next week' },
-    { id: 6, name: 'Neha Patel', email: 'neha.patel@mail.com', phone: '9001122334', dateOfCalling: '16/2/2026', remarks: 'No answer on first attempt' },
-];
+import React, { useMemo, useState } from "react";
+import { Loader2, PhoneCall, Trash2, Pencil } from "lucide-react";
+import {
+  useGetRequestCallsQuery,
+  useAddRequestCallMutation,
+  useUpdateRequestCallMutation,
+  useDeleteRequestCallMutation,
+} from "../../../redux/api/clientApiSlice";
 
 const ClientCallbackData = () => {
-    const [rows, setRows] = useState(initialRows);
-    const [searchInput, setSearchInput] = useState('');
-    const [searchApplied, setSearchApplied] = useState('');
+    const [searchInput, setSearchInput] = useState("");
+    const [searchApplied, setSearchApplied] = useState("");
+    const [isAddOpen, setIsAddOpen] = useState(false);
+    const [formData, setFormData] = useState({ name: "", email: "", phone: "" });
+    const [isEditOpen, setIsEditOpen] = useState(false);
+    const [editingId, setEditingId] = useState(null);
+    const [editFormData, setEditFormData] = useState({ name: "", email: "", phone: "" });
+    const { data, isLoading, isError, error, refetch } = useGetRequestCallsQuery({
+        page: 1,
+        limit: 1000,
+    });
+    const [addRequestCall, { isLoading: isAdding }] = useAddRequestCallMutation();
+    const [updateRequestCall, { isLoading: isUpdating }] = useUpdateRequestCallMutation();
+    const [deleteRequestCall, { isLoading: isDeleting }] = useDeleteRequestCallMutation();
+
+    const rows = useMemo(() => {
+        const source = Array.isArray(data?.data) ? data.data : Array.isArray(data) ? data : [];
+        return source.map((item, index) => ({
+            id: index + 1,
+            _id: item._id,
+            name: item.name || "-",
+            email: item.email || "-",
+            phone: item.phone || "-",
+            dateOfCalling: item.createdAt
+                ? new Date(item.createdAt).toLocaleDateString("en-GB")
+                : "-",
+            remarks: item.remarks || item.status || "-",
+        }));
+    }, [data]);
 
     const filteredRows = useMemo(() => {
         const q = searchApplied.trim().toLowerCase();
@@ -23,8 +46,57 @@ const ClientCallbackData = () => {
         );
     }, [rows, searchApplied]);
 
-    const handleDelete = (id) => {
-        setRows((prev) => prev.filter((r) => r.id !== id).map((r, i) => ({ ...r, id: i + 1 })));
+    const handleDelete = async (id) => {
+        if (!window.confirm("Delete this callback request?")) return;
+        try {
+            await deleteRequestCall(id).unwrap();
+            refetch();
+        } catch (err) {
+            alert(err?.data?.message || "Failed to delete request");
+        }
+    };
+
+    const handleAdd = async (e) => {
+        e.preventDefault();
+        try {
+            await addRequestCall(formData).unwrap();
+            refetch();
+            setFormData({ name: "", email: "", phone: "" });
+            setIsAddOpen(false);
+        } catch (err) {
+            alert(err?.data?.message || "Failed to create request");
+        }
+    };
+
+    const handleOpenEdit = (row) => {
+        setEditingId(row._id);
+        setEditFormData({
+            name: row.name || "",
+            email: row.email || "",
+            phone: row.phone || "",
+        });
+        setIsEditOpen(true);
+    };
+
+    const handleEditSubmit = async (e) => {
+        e.preventDefault();
+        if (!editingId) return;
+        try {
+            await updateRequestCall({
+                id: editingId,
+                data: {
+                    name: editFormData.name,
+                    email: editFormData.email,
+                    phone: editFormData.phone,
+                },
+            }).unwrap();
+            refetch();
+            setIsEditOpen(false);
+            setEditingId(null);
+            setEditFormData({ name: "", email: "", phone: "" });
+        } catch (err) {
+            alert(err?.data?.message || "Failed to update request");
+        }
     };
 
     return (
@@ -40,8 +112,95 @@ const ClientCallbackData = () => {
                     />
                     <button onClick={() => setSearchApplied(searchInput)} className="px-5 py-2.5 rounded-xl bg-dark-900 text-text-primary font-bold">Apply</button>
                     <button onClick={() => { setSearchInput(''); setSearchApplied(''); }} className="px-5 py-2.5 rounded-xl bg-dark-700 text-text-primary font-bold">Clear</button>
+                    <button onClick={() => setIsAddOpen((p) => !p)} className="px-5 py-2.5 rounded-xl bg-primary text-white font-bold">Add Request</button>
                 </div>
             </div>
+
+            {isAddOpen ? (
+                <form onSubmit={handleAdd} className="bg-dark-900 border border-dark-600/60 rounded-2xl p-4 grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <input
+                        value={formData.name}
+                        onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
+                        placeholder="Name"
+                        className="px-4 py-2.5 bg-dark-900 border border-dark-600 rounded-xl text-sm focus:outline-none focus:border-primary"
+                        required
+                    />
+                    <input
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => setFormData((p) => ({ ...p, email: e.target.value }))}
+                        placeholder="Email"
+                        className="px-4 py-2.5 bg-dark-900 border border-dark-600 rounded-xl text-sm focus:outline-none focus:border-primary"
+                        required
+                    />
+                    <input
+                        value={formData.phone}
+                        onChange={(e) => setFormData((p) => ({ ...p, phone: e.target.value }))}
+                        placeholder="Phone"
+                        className="px-4 py-2.5 bg-dark-900 border border-dark-600 rounded-xl text-sm focus:outline-none focus:border-primary"
+                        required
+                    />
+                    <button type="submit" disabled={isAdding} className="px-5 py-2.5 rounded-xl bg-primary text-white font-bold disabled:opacity-60">
+                        {isAdding ? "Saving..." : "Save"}
+                    </button>
+                </form>
+            ) : null}
+
+            {isEditOpen ? (
+                <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
+                    <div className="w-full max-w-lg bg-dark-900 border border-dark-600 rounded-2xl p-5">
+                        <div className="flex items-center justify-between mb-4">
+                            <h2 className="text-lg font-bold text-text-primary">Edit Callback Request</h2>
+                            <button
+                                onClick={() => {
+                                    setIsEditOpen(false);
+                                    setEditingId(null);
+                                }}
+                                className="px-3 py-1.5 rounded-lg bg-dark-700 text-text-primary"
+                            >
+                                Close
+                            </button>
+                        </div>
+                        <form onSubmit={handleEditSubmit} className="grid grid-cols-1 gap-3">
+                            <input
+                                value={editFormData.name}
+                                onChange={(e) =>
+                                    setEditFormData((p) => ({ ...p, name: e.target.value }))
+                                }
+                                placeholder="Name"
+                                className="px-4 py-2.5 bg-dark-900 border border-dark-600 rounded-xl text-sm focus:outline-none focus:border-primary"
+                                required
+                            />
+                            <input
+                                type="email"
+                                value={editFormData.email}
+                                onChange={(e) =>
+                                    setEditFormData((p) => ({ ...p, email: e.target.value }))
+                                }
+                                placeholder="Email"
+                                className="px-4 py-2.5 bg-dark-900 border border-dark-600 rounded-xl text-sm focus:outline-none focus:border-primary"
+                                required
+                            />
+                            <input
+                                value={editFormData.phone}
+                                onChange={(e) =>
+                                    setEditFormData((p) => ({ ...p, phone: e.target.value }))
+                                }
+                                placeholder="Phone"
+                                className="px-4 py-2.5 bg-dark-900 border border-dark-600 rounded-xl text-sm focus:outline-none focus:border-primary"
+                                required
+                            />
+                            <button
+                                type="submit"
+                                disabled={isUpdating}
+                                className="px-5 py-2.5 rounded-xl bg-primary text-white font-bold disabled:opacity-60"
+                            >
+                                {isUpdating ? "Updating..." : "Update"}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            ) : null}
 
             <div className="bg-dark-900 border border-dark-600/60 rounded-2xl overflow-hidden">
                 <div className="overflow-x-auto">
@@ -54,7 +213,28 @@ const ClientCallbackData = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredRows.map((row) => (
+                            {isLoading ? (
+                                <tr>
+                                    <td colSpan={7} className="px-4 py-8 text-center text-text-muted">
+                                        <span className="inline-flex items-center gap-2">
+                                            <Loader2 className="w-4 h-4 animate-spin" />
+                                            Loading callback requests...
+                                        </span>
+                                    </td>
+                                </tr>
+                            ) : isError ? (
+                                <tr>
+                                    <td colSpan={7} className="px-4 py-8 text-center text-red-400">
+                                        {error?.data?.message || "Failed to load callback requests"}
+                                    </td>
+                                </tr>
+                            ) : filteredRows.length === 0 ? (
+                                <tr>
+                                    <td colSpan={7} className="px-4 py-8 text-center text-text-muted">
+                                        No callback requests found
+                                    </td>
+                                </tr>
+                            ) : filteredRows.map((row) => (
                                 <tr key={row.id} className="border-b border-dark-600/30 hover:bg-dark-800/50">
                                     <td className="px-4 py-3.5 whitespace-nowrap">{row.id}</td>
                                     <td className="px-4 py-3.5 whitespace-nowrap font-semibold">{row.name}</td>
@@ -64,10 +244,24 @@ const ClientCallbackData = () => {
                                     <td className="px-4 py-3.5 whitespace-nowrap max-w-[380px] truncate">{row.remarks}</td>
                                     <td className="px-4 py-3.5 whitespace-nowrap">
                                         <div className="flex items-center gap-2">
-                                            <button className="p-2 rounded-lg bg-primary/10 border border-primary/20 text-primary hover:bg-primary/20">
+                                            <a
+                                                href={`tel:${row.phone}`}
+                                                className="p-2 rounded-lg bg-primary/10 border border-primary/20 text-primary hover:bg-primary/20"
+                                            >
                                                 <PhoneCall className="w-4 h-4" />
+                                            </a>
+                                            <button
+                                                onClick={() => handleOpenEdit(row)}
+                                                disabled={isUpdating}
+                                                className="p-2 rounded-lg bg-dark-700 border border-dark-600 text-text-muted hover:text-primary disabled:opacity-60"
+                                            >
+                                                <Pencil className="w-4 h-4" />
                                             </button>
-                                            <button onClick={() => handleDelete(row.id)} className="p-2 rounded-lg bg-dark-700 border border-dark-600 text-text-muted hover:text-red-500">
+                                            <button
+                                                onClick={() => handleDelete(row._id)}
+                                                disabled={isDeleting}
+                                                className="p-2 rounded-lg bg-dark-700 border border-dark-600 text-text-muted hover:text-red-500 disabled:opacity-60"
+                                            >
                                                 <Trash2 className="w-4 h-4" />
                                             </button>
                                         </div>
