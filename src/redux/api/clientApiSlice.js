@@ -2,6 +2,7 @@ import { apiSlice } from './apiSlice';
 
 const CLIENTS_URL = 'clients';
 const FORMS_URL = 'forms';
+const REQUEST_CALL_URL = 'request-call';
 
 export const clientApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -109,6 +110,41 @@ export const clientApiSlice = apiSlice.injectEndpoints({
       ],
     }),
 
+    getRequestCalls: builder.query({
+      query: ({ page = 1, limit = 10 } = {}) => ({
+        url: REQUEST_CALL_URL,
+        params: { page, limit },
+      }),
+      transformResponse: (response) => response,
+      keepUnusedDataFor: 5,
+    }),
+
+    addRequestCall: builder.mutation({
+      query: (data) => ({
+        url: REQUEST_CALL_URL,
+        method: 'POST',
+        body: data,
+      }),
+      invalidatesTags: [{ type: 'Client', id: 'LIST' }],
+    }),
+
+    updateRequestCall: builder.mutation({
+      query: ({ id, data }) => ({
+        url: `${REQUEST_CALL_URL}/${id}`,
+        method: 'PUT',
+        body: data,
+      }),
+      invalidatesTags: [{ type: 'Client', id: 'LIST' }],
+    }),
+
+    deleteRequestCall: builder.mutation({
+      query: (id) => ({
+        url: `${REQUEST_CALL_URL}/${id}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: [{ type: 'Client', id: 'LIST' }],
+    }),
+
 
     addClient: builder.mutation({
       query: (data) => ({
@@ -155,6 +191,10 @@ export const {
   useUpdateFormStatusMutation,
   useAssignFormMutation,
   useDeleteFormMutation,
+  useGetRequestCallsQuery,
+  useAddRequestCallMutation,
+  useUpdateRequestCallMutation,
+  useDeleteRequestCallMutation,
   useAddClientMutation,
   useUpdateClientMutation,
   useDeleteClientMutation,
