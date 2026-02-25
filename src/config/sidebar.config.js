@@ -6,9 +6,11 @@ import {
   Phone,
   PhoneCall,
   Table,
+  DollarSign,
   CreditCard,
   History,
   BarChart2,
+  Repeat,
   UserCheck,
   UserCog,
   ClipboardCheck,
@@ -52,7 +54,7 @@ export const SIDEBAR_CONFIG = [
     icon: Briefcase,
     section: "OPERATIONS",
     children: [
-      { key: "activeProjects", label: "Active Projects", path: "/operations/active", icon: Briefcase },
+      { key: "activeProjects", label: "Active Projects", path: "/management/projects", icon: Briefcase },
       { key: "archivedProjects", label: "Archived Projects", path: "/operations/archived", icon: Briefcase }
     ]
   },
@@ -72,18 +74,20 @@ export const SIDEBAR_CONFIG = [
     ]
   },
 
-  {
-    key: "finance",
-    type: "menu",
-    label: "Finance & Contracts",
-    icon: BarChart2,
-    section: "FINANCE",
-    children: [
-      { key: "contracts", label: "Contracts", path: "/finance/contracts", icon: BarChart2 },
-      { key: "invoices", label: "Invoices", path: "/finance/invoices", icon: UserCheck },
-      { key: "revenue", label: "Revenue Reports", path: "/finance/reports", icon: PieChart }
-    ]
-  },
+ {
+  key: "finance",
+  type: "menu",
+  label: "Finance & Contracts",
+  icon: BarChart2,  // Finance menu main icon
+  section: "FINANCE",
+  children: [
+    { key: "contracts", label: "Contracts", path: "/finance/contracts", icon: FileText },
+    { key: "invoices", label: "Invoices", path: "/finance/invoices", icon: UserCheck },
+    { key: "revenue", label: "Revenue Reports", path: "/finance/reports", icon: PieChart },
+    { key: "payouts", label: "Recurring Payouts", path: "/finance/payouts", icon: Repeat },  // Recurring Payouts icon
+    { key: "deposits", label: "Security Deposits", path: "/finance/deposits", icon: DollarSign } // Deposits icon
+  ]
+},
 
   {
     key: "performance",
@@ -93,7 +97,10 @@ export const SIDEBAR_CONFIG = [
     section: "PERFORMANCE",
     children: [
       { key: "performanceDashboard", label: "Performance Dashboard", path: "/performance", icon: BarChart2 },
-      { key: "agentEval", label: "Agent Evaluation", path: "/performance/agent", icon: UserCheck }
+      { key: "centerEval", label: "Center Evaluation", path: "/evaluation/center", icon: Building2 },
+      { key: "agentEval", label: "Agent Evaluation", path: "/evaluation/agent", icon: UserCheck },
+      { key: "projectEval", label: "QA Evaluation", path: "/evaluation/qa", icon: UserCog },
+      { key: "tlEval", label: "TL Evaluation", path: "/evaluation/tl", icon: ClipboardCheck }
     ]
   },
 

@@ -5,6 +5,7 @@ import MainLayout from './components/layout/MainLayout';
 import Login from './pages/auth/Login';
 // import Register from './pages/auth/Register';
 import ProtectedRoute from './ProtectedRoute';
+import UserManagement from './pages/identity/UserManagement';
 
 //  DASHBOARDS
 const UnifiedDashboard = lazy(() => import('./pages/dashboard/UnifiedDashboard'));
@@ -18,6 +19,14 @@ const SalesOpportunities = lazy(() => import('./pages/Sales/Opportunities'));
 const SalesManageProjects = lazy(() => import('./pages/Sales/ManageProjects'));
 const SalesCloseDeal = lazy(() => import('./pages/Sales/ClosedDeals'));
 const SalesDealPipeline = lazy(() => import('./pages/Sales/DealPipeline'));
+
+// Finance & Contracts 
+
+const Contracts = lazy(()=> import("./pages/Finance/Contracts"))
+const Invoices = lazy(()=> import("./pages/Finance/Invoices"))
+const RecurringPayouts = lazy(()=> import("./pages/Finance/RecurringPayouts"))
+const RecurringReports = lazy(()=> import("./pages/Finance/RevenueReports"))
+const SecurityDeposits = lazy(()=> import("./pages/Finance/SecurityDeposits"))
 
 //  MANAGEMENT
 const Projects = lazy(() => import('./pages/adminmanagement/projects/Projects'));
@@ -39,7 +48,7 @@ const ManageAdmin = lazy(() => import('./pages/evaluation/ManageAdmin'));
 const Charts = lazy(() => import('./pages/evaluation/Charts'));
 
 //  IDENTITY
-const Overview = lazy(() => import('./pages/identity/Overview'));
+const Overview = lazy(() => import('./pages/identity/UserManagement'));
 
 const Loading = () => (
   <div className="flex h-screen w-full items-center justify-center bg-dark-900">
@@ -66,7 +75,7 @@ function App() {
               <Route path="dashboard/overview" element={<UnifiedDashboard />} />
               <Route path="dashboard/management" element={<ManagementDashboard />} />
               <Route path="dashboard/evaluation" element={<EvaluationDashboard />} />
-              <Route path="dashboard/identity" element={<IdentityDashboard />} />
+              <Route path="dashboard/identity" element={<UserManagement />} />
 
               {/* Sales */}
                 <Route path="sales/leads" element={<SalesLeads />} />
@@ -74,6 +83,16 @@ function App() {
               <Route path="sales/projects" element={<SalesManageProjects />} />
               <Route path="sales/pipeline" element={<SalesDealPipeline />} />
               <Route path="sales/closed" element={<SalesCloseDeal />} />
+
+                  {/* Finance & Contracts */}
+
+
+              <Route path="finance/contracts" element={<Contracts />} />
+              <Route path="finance/invoices" element={<Invoices />} />
+              <Route path="finance/payouts" element={<RecurringPayouts />} />
+              <Route path="finance/reports" element={<RecurringReports />} />
+              <Route path="finance/deposits" element={<SecurityDeposits />} />
+
 
               {/* MANAGEMENT */}
               <Route path="management/blogs" element={<Blogs />} />
@@ -95,7 +114,7 @@ function App() {
               <Route path="evaluation/charts" element={<Charts />} />
 
               {/* IDENTITY */}
-              <Route path="identity/overview" element={<Overview />} />
+              <Route path="identity" element={<UserManagement />} />
 
               {/* FALLBACK */}
               <Route path="*" element={<Navigate to="/dashboard/management" replace />} />
