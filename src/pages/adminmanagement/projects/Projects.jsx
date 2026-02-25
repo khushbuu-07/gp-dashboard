@@ -22,7 +22,6 @@ import {
   useDeleteProjectMutation,
 } from "../../../redux/api/projectApiSlice";
 import { toast } from "../../../utils/toast";
-
 const countries = [
   "Germany",
   "New Zealand",
