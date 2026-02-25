@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   Download,
   MessageCircle,
@@ -26,6 +26,7 @@ import {
   useAddClientMutation,
   useUpdateClientMutation,
 } from "../../../redux/api/clientApiSlice";
+import { toast } from "../../../utils/toast";
 
 const statusClass = {
   active:
@@ -76,6 +77,7 @@ const ClientsData = () => {
   });
   const [addClient, { isLoading: isAdding }] = useAddClientMutation();
   const [updateClient, { isLoading: isUpdating }] = useUpdateClientMutation();
+  const hasShownLoadToast = useRef(false);
 
   const rows = useMemo(() => {
     const source = Array.isArray(data?.clients)
@@ -117,7 +119,7 @@ const ClientsData = () => {
     e.preventDefault();
     try {
       if (!formData.mobile?.trim()) {
-        alert("Phone number is required");
+        toast.error("Phone number is required");
         return;
       }
 
@@ -148,9 +150,10 @@ const ClientsData = () => {
         remarks: "",
       });
       setIsFormOpen(false);
+      toast.success("Client added successfully");
     } catch (err) {
       console.error("Failed to add client:", err);
-      alert(err?.data?.message || "Failed to add client");
+      toast.error(err?.data?.message || "Failed to add client");
     }
   };
 
@@ -176,6 +179,7 @@ const ClientsData = () => {
         phone: editFormData.phone,
         status: normalizeStatus(editFormData.status),
       }).unwrap();
+      toast.success("Client updated successfully");
       setIsEditOpen(false);
       setEditingClientId(null);
       setEditFormData({
@@ -186,9 +190,22 @@ const ClientsData = () => {
       });
     } catch (err) {
       console.error("Failed to update client:", err);
-      alert(err?.data?.message || "Failed to update client");
+      toast.error(err?.data?.message || "Failed to update client");
     }
   };
+
+  useEffect(() => {
+    if (!isLoading && !isError && data && !hasShownLoadToast.current) {
+      toast.info("Clients loaded");
+      hasShownLoadToast.current = true;
+    }
+  }, [isLoading, isError, data]);
+
+  useEffect(() => {
+    if (isError) {
+      toast.error(error?.data?.message || "Failed to load clients");
+    }
+  }, [isError, error]);
 
   const filteredRows = useMemo(() => {
     return rows.filter((row) => {
@@ -212,19 +229,19 @@ const ClientsData = () => {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900/10 to-slate-900 p-6">
+    <div className="min-h-screen bg-dark-900 p-6 text-text-muted font-sans">
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+            <h1 className="text-4xl font-bold text-text-primary tracking-tight">
               Client Dashboard
             </h1>
-            <p className="text-slate-400 mt-1">Manage and track your client interactions</p>
+            <p className="text-text-muted mt-1">Manage and track your client interactions</p>
           </div>
 
           <button
-            onClick={() => setIsFormOpen(!isFormOpen)}
-            className="group relative px-6 py-3 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-xl font-semibold text-white shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300 hover:scale-105"
+            onClick={() => setIsFormOpen((prev) => !prev)}
+            className="group relative px-6 py-3 bg-primary hover:bg-primary-dark rounded-xl font-semibold text-white shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-300 hover:scale-105"
           >
             <span className="flex items-center gap-2">
               <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
@@ -247,12 +264,12 @@ const ClientsData = () => {
               transition={{ delay: idx * 0.1 }}
               className="relative group"
             >
-              <div className={`absolute inset-0 bg-gradient-to-r ${stat.color} rounded-2xl opacity-20 group-hover:opacity-30 transition-opacity blur-xl`} />
-              <div className="relative bg-slate-800/50 backdrop-blur-xl border border-slate-700 rounded-2xl p-6 overflow-hidden">
+              <div className={`absolute inset-0 bg-gradient-to-r ${stat.color} rounded-2xl opacity-10 group-hover:opacity-20 transition-opacity blur-xl`} />
+              <div className="relative bg-dark-850 border border-dark-700/50 rounded-2xl p-6 overflow-hidden hover:border-dark-600 transition-colors">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p className="text-slate-400 text-sm">{stat.label}</p>
-                    <p className="text-3xl font-bold text-white mt-1">{stat.value}</p>
+                    <p className="text-text-muted text-sm font-medium">{stat.label}</p>
+                    <p className="text-3xl font-bold text-text-primary mt-1">{stat.value}</p>
                   </div>
                   <div className={`p-3 bg-gradient-to-r ${stat.color} rounded-xl opacity-80`}>
                     <stat.icon className="w-5 h-5 text-white" />
@@ -272,14 +289,14 @@ const ClientsData = () => {
               transition={{ duration: 0.3 }}
               className="overflow-hidden"
             >
-              <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700 rounded-2xl p-6 shadow-2xl">
+              <div className="bg-dark-850 border border-dark-700/50 rounded-2xl p-6 shadow-2xl">
                 <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-xl font-semibold text-white">Add New Client</h2>
+                  <h2 className="text-xl font-bold text-text-primary">Add New Client</h2>
                   <button
                     onClick={() => setIsFormOpen(false)}
-                    className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
+                    className="p-2 hover:bg-dark-700 rounded-lg transition-colors text-text-muted hover:text-text-primary"
                   >
-                    <X className="w-5 h-5 text-slate-400" />
+                    <X className="w-5 h-5" />
                   </button>
                 </div>
 
@@ -297,7 +314,7 @@ const ClientsData = () => {
                     name="status"
                     value={formData.status}
                     onChange={handleChange}
-                    className="col-span-1 bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
+                    className="col-span-1 bg-dark-900 border border-dark-700 rounded-xl px-4 py-3 text-text-primary focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
                   >
                     <option value="active">active</option>
                     <option value="prospect">prospect</option>
@@ -309,13 +326,13 @@ const ClientsData = () => {
                     value={formData.remarks}
                     onChange={handleChange}
                     placeholder="Add remarks..."
-                    className="col-span-1 md:col-span-3 bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all min-h-[100px]"
+                    className="col-span-1 md:col-span-3 bg-dark-900 border border-dark-700 rounded-xl px-4 py-3 text-text-primary placeholder-text-muted focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all min-h-[100px]"
                   />
 
                   <button
                     type="submit"
                     disabled={isAdding}
-                    className="col-span-1 md:col-span-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-bold py-3 rounded-xl hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-300 disabled:opacity-70 flex items-center justify-center gap-2"
+                    className="col-span-1 md:col-span-3 bg-primary hover:bg-primary-dark text-white font-bold py-3 rounded-xl hover:shadow-lg hover:shadow-primary/20 transition-all duration-300 disabled:opacity-70 flex items-center justify-center gap-2"
                   >
                     {isAdding ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
                     Add Client
@@ -335,17 +352,17 @@ const ClientsData = () => {
               transition={{ duration: 0.3 }}
               className="overflow-hidden"
             >
-              <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700 rounded-2xl p-6 shadow-2xl">
+              <div className="bg-dark-850 border border-dark-700/50 rounded-2xl p-6 shadow-2xl">
                 <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-xl font-semibold text-white">Edit Client</h2>
+                  <h2 className="text-xl font-bold text-text-primary">Edit Client</h2>
                   <button
                     onClick={() => {
                       setIsEditOpen(false);
                       setEditingClientId(null);
                     }}
-                    className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
+                    className="p-2 hover:bg-dark-700 rounded-lg transition-colors text-text-muted hover:text-text-primary"
                   >
-                    <X className="w-5 h-5 text-slate-400" />
+                    <X className="w-5 h-5" />
                   </button>
                 </div>
 
@@ -387,7 +404,7 @@ const ClientsData = () => {
                     onChange={(e) =>
                       setEditFormData((prev) => ({ ...prev, status: e.target.value }))
                     }
-                    className="col-span-1 bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
+                    className="col-span-1 bg-dark-900 border border-dark-700 rounded-xl px-4 py-3 text-text-primary focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
                   >
                     <option value="active">active</option>
                     <option value="prospect">prospect</option>
@@ -397,7 +414,7 @@ const ClientsData = () => {
                   <button
                     type="submit"
                     disabled={isUpdating}
-                    className="col-span-1 md:col-span-4 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-bold py-3 rounded-xl hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-300 disabled:opacity-70 flex items-center justify-center gap-2"
+                    className="col-span-1 md:col-span-4 bg-primary hover:bg-primary-dark text-white font-bold py-3 rounded-xl hover:shadow-lg hover:shadow-primary/20 transition-all duration-300 disabled:opacity-70 flex items-center justify-center gap-2"
                   >
                     {isUpdating ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
                     Update Client
@@ -410,13 +427,13 @@ const ClientsData = () => {
 
         <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
           <div className="relative flex-1 w-full">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-500" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-text-muted" />
             <input
               type="text"
               placeholder="Search clients..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-slate-800/50 border border-slate-700 rounded-xl pl-10 pr-4 py-3 text-white placeholder-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
+              className="w-full bg-dark-850 border border-dark-700/50 rounded-xl pl-10 pr-4 py-3 text-text-primary placeholder-text-muted focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
             />
           </div>
 
@@ -424,7 +441,7 @@ const ClientsData = () => {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-blue-500 outline-none transition-all"
+              className="bg-dark-850 border border-dark-700/50 rounded-xl px-4 py-3 text-text-primary focus:border-primary outline-none transition-all"
             >
               <option value="all">All Status</option>
               <option value="active">Active</option>
@@ -432,8 +449,8 @@ const ClientsData = () => {
               <option value="inactive">Inactive</option>
             </select>
 
-            <button className="p-3 bg-slate-800/50 border border-slate-700 rounded-xl hover:bg-slate-700/50 transition-colors">
-              <Download className="w-5 h-5 text-slate-400" />
+            <button className="p-3 bg-dark-850 border border-dark-700/50 rounded-xl hover:bg-dark-700 transition-colors text-text-muted hover:text-text-primary">
+              <Download className="w-5 h-5" />
             </button>
           </div>
         </div>
@@ -441,10 +458,10 @@ const ClientsData = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-slate-800/50 backdrop-blur-xl border border-slate-700 rounded-2xl overflow-hidden shadow-2xl"
+          className="bg-dark-850 border border-dark-700/50 rounded-2xl overflow-hidden shadow-2xl"
         >
           {isLoading ? (
-            <div className="py-16 flex items-center justify-center text-slate-300">
+            <div className="py-16 flex items-center justify-center text-text-muted">
               <Loader2 className="w-5 h-5 animate-spin mr-2" />
               Loading clients...
             </div>
@@ -454,24 +471,24 @@ const ClientsData = () => {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full text-sm sticky-first-col">
                 <thead>
-                  <tr className="bg-slate-900/50 border-b border-slate-700">
-                    <th className="px-4 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Sno</th>
-                    <th className="px-4 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Name</th>
-                    <th className="px-4 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Mobile</th>
-                    <th className="hidden px-4 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider sm:table-cell">Email</th>
-                    <th className="hidden px-4 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider lg:table-cell">Project</th>
-                    <th className="hidden px-4 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider lg:table-cell">Code</th>
-                    <th className="hidden px-4 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider xl:table-cell">Location</th>
-                    <th className="hidden px-4 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider xl:table-cell">Date</th>
-                    <th className="hidden px-4 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider xl:table-cell">Attended</th>
-                    <th className="px-4 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Status</th>
-                    <th className="hidden px-4 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider lg:table-cell">Remarks</th>
-                    <th className="px-4 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">Actions</th>
+                  <tr className="bg-dark-800/50 border-b border-dark-700/50">
+                    <th className="sticky left-0 z-30 px-4 py-4 text-left text-xs font-bold text-text-muted uppercase tracking-wider !bg-dark-850">Sno</th>
+                    <th className="px-4 py-4 text-left text-xs font-bold text-text-muted uppercase tracking-wider">Name</th>
+                    <th className="px-4 py-4 text-left text-xs font-bold text-text-muted uppercase tracking-wider">Mobile</th>
+                    <th className="hidden px-4 py-4 text-left text-xs font-bold text-text-muted uppercase tracking-wider sm:table-cell">Email</th>
+                    <th className="hidden px-4 py-4 text-left text-xs font-bold text-text-muted uppercase tracking-wider lg:table-cell">Project</th>
+                    <th className="hidden px-4 py-4 text-left text-xs font-bold text-text-muted uppercase tracking-wider lg:table-cell">Code</th>
+                    <th className="hidden px-4 py-4 text-left text-xs font-bold text-text-muted uppercase tracking-wider xl:table-cell">Location</th>
+                    <th className="hidden px-4 py-4 text-left text-xs font-bold text-text-muted uppercase tracking-wider xl:table-cell">Date</th>
+                    <th className="hidden px-4 py-4 text-left text-xs font-bold text-text-muted uppercase tracking-wider xl:table-cell">Attended</th>
+                    <th className="px-4 py-4 text-left text-xs font-bold text-text-muted uppercase tracking-wider">Status</th>
+                    <th className="hidden px-4 py-4 text-left text-xs font-bold text-text-muted uppercase tracking-wider lg:table-cell">Remarks</th>
+                    <th className="px-4 py-4 text-left text-xs font-bold text-text-muted uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-700">
+                <tbody className="divide-y divide-dark-700/50">
                   <AnimatePresence>
                     {filteredRows.map((row, idx) => (
                       <motion.tr
@@ -480,19 +497,19 @@ const ClientsData = () => {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ delay: idx * 0.02 }}
-                        className="group hover:bg-slate-700/30 transition-colors"
+                        className="group hover:bg-dark-700/30 transition-colors"
                       >
-                        <td className="px-4 py-4 text-slate-300">{row.sno}</td>
-                        <td className="px-4 py-4 font-medium text-white">{row.name}</td>
-                        <td className="px-4 py-4 text-slate-300">{row.mobile}</td>
-                        <td className="hidden px-4 py-4 text-slate-300 sm:table-cell">{row.email}</td>
-                        <td className="hidden px-4 py-4 text-slate-300 lg:table-cell">{row.projectInterested}</td>
-                        <td className="hidden px-4 py-4 text-slate-300 lg:table-cell">{row.projectCode}</td>
-                        <td className="hidden px-4 py-4 text-slate-300 xl:table-cell">{row.location}</td>
-                        <td className="hidden px-4 py-4 text-slate-300 xl:table-cell">
+                        <td className="sticky left-0 z-20 px-4 py-4 text-text-secondary !bg-dark-850 group-hover:!bg-dark-800">{row.sno}</td>
+                        <td className="px-4 py-4 font-medium text-text-primary">{row.name}</td>
+                        <td className="px-4 py-4 text-text-muted">{row.mobile}</td>
+                        <td className="hidden px-4 py-4 text-text-muted sm:table-cell">{row.email}</td>
+                        <td className="hidden px-4 py-4 text-text-muted lg:table-cell">{row.projectInterested}</td>
+                        <td className="hidden px-4 py-4 text-text-muted lg:table-cell">{row.projectCode}</td>
+                        <td className="hidden px-4 py-4 text-text-muted xl:table-cell">{row.location}</td>
+                        <td className="hidden px-4 py-4 text-text-muted xl:table-cell">
                           {row.dateOfCall ? new Date(row.dateOfCall).toLocaleDateString("en-GB") : "-"}
                         </td>
-                        <td className="hidden px-4 py-4 text-slate-300 xl:table-cell">{row.attendedBy || "-"}</td>
+                        <td className="hidden px-4 py-4 text-text-muted xl:table-cell">{row.attendedBy || "-"}</td>
                         <td className="px-4 py-4">
                           <span
                             className={twMerge(
@@ -506,7 +523,7 @@ const ClientsData = () => {
                             {normalizeStatus(row.status)}
                           </span>
                         </td>
-                        <td className="hidden max-w-[200px] truncate px-4 py-4 text-slate-300 lg:table-cell">
+                        <td className="hidden max-w-[200px] truncate px-4 py-4 text-text-muted lg:table-cell">
                           {row.remarks}
                         </td>
                         <td className="px-4 py-4">
@@ -514,12 +531,12 @@ const ClientsData = () => {
                             <button
                               onClick={() => handleOpenEdit(row)}
                               disabled={isUpdating}
-                              className="p-2 bg-slate-700 rounded-lg hover:bg-slate-600 transition-colors disabled:opacity-60"
+                              className="p-2 bg-dark-700 rounded-lg hover:bg-dark-600 transition-colors disabled:opacity-60 text-text-muted hover:text-text-primary"
                             >
-                              <Pencil className="w-4 h-4 text-slate-300" />
+                              <Pencil className="w-4 h-4" />
                             </button>
-                            <button className="p-2 bg-slate-700 rounded-lg hover:bg-slate-600 transition-colors">
-                              <MessageCircle className="w-4 h-4 text-slate-300" />
+                            <button className="p-2 bg-dark-700 rounded-lg hover:bg-dark-600 transition-colors text-text-muted hover:text-text-primary">
+                              <MessageCircle className="w-4 h-4" />
                             </button>
                           </div>
                         </td>
@@ -531,7 +548,7 @@ const ClientsData = () => {
 
               {filteredRows.length === 0 && (
                 <div className="text-center py-12">
-                  <p className="text-slate-400">No clients found</p>
+                  <p className="text-text-muted">No clients found</p>
                 </div>
               )}
             </div>
@@ -544,10 +561,10 @@ const ClientsData = () => {
 
 const InputField = ({ icon: Icon, ...props }) => (
   <div className="relative col-span-1">
-    <Icon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-500" />
+    <Icon className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-text-muted" />
     <input
       {...props}
-      className="w-full bg-slate-900/50 border border-slate-700 rounded-xl pl-10 pr-4 py-3 text-white placeholder-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
+      className="w-full bg-dark-900 border border-dark-700 rounded-xl pl-10 pr-4 py-3 text-text-primary placeholder-text-muted focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
     />
   </div>
 );
