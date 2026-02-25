@@ -93,7 +93,10 @@ export const SIDEBAR_CONFIG = [
     section: "PERFORMANCE",
     children: [
       { key: "performanceDashboard", label: "Performance Dashboard", path: "/performance", icon: BarChart2 },
-      { key: "agentEval", label: "Agent Evaluation", path: "/performance/agent", icon: UserCheck }
+      { key: "centerEval", label: "Center Evaluation", path: "/evaluation/center", icon: Building2 },
+      { key: "agentEval", label: "Agent Evaluation", path: "/evaluation/agent", icon: UserCheck },
+      { key: "projectEval", label: "QA Evaluation", path: "/evaluation/qa", icon: UserCog },
+      { key: "tlEval", label: "TL Evaluation", path: "/evaluation/tl", icon: ClipboardCheck }
     ]
   },
 
