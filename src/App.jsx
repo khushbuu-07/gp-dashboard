@@ -12,6 +12,13 @@ const ManagementDashboard = lazy(() => import('./pages/dashboard/Dashboard'));
 const EvaluationDashboard = lazy(() => import('./pages/dashboard/evaluation/EvaluationDashboard'));
 const IdentityDashboard = lazy(() => import('./pages/dashboard/IdentityHub/IdentityDashboard'));
 
+//Sales
+const SalesLeads = lazy(() => import('./pages/Sales/Leads'));
+const SalesOpportunities = lazy(() => import('./pages/Sales/Opportunities'));
+const SalesManageProjects = lazy(() => import('./pages/Sales/ManageProjects'));
+const SalesCloseDeal = lazy(() => import('./pages/Sales/ClosedDeals'));
+const SalesDealPipeline = lazy(() => import('./pages/Sales/DealPipeline'));
+
 //  MANAGEMENT
 const Projects = lazy(() => import('./pages/adminmanagement/projects/Projects'));
 const AllProjects = lazy(() => import('./pages/adminmanagement/projects/AllProjects'));
@@ -60,6 +67,13 @@ function App() {
               <Route path="dashboard/management" element={<ManagementDashboard />} />
               <Route path="dashboard/evaluation" element={<EvaluationDashboard />} />
               <Route path="dashboard/identity" element={<IdentityDashboard />} />
+
+              {/* Sales */}
+                <Route path="sales/leads" element={<SalesLeads />} />
+              <Route path="sales/opportunities" element={<SalesOpportunities />} />
+              <Route path="sales/projects" element={<SalesManageProjects />} />
+              <Route path="sales/pipeline" element={<SalesDealPipeline />} />
+              <Route path="sales/closed" element={<SalesCloseDeal />} />
 
               {/* MANAGEMENT */}
               <Route path="management/blogs" element={<Blogs />} />
