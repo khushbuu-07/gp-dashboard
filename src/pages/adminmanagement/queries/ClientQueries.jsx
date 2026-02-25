@@ -1,5 +1,14 @@
-import React, { useMemo, useState } from "react";
-import { Search, Filter, CheckCircle, Clock, AlertCircle, Loader2, X } from "lucide-react";
+import React, { useEffect, useMemo, useState } from "react";
+import {
+  Search,
+  Filter,
+  CheckCircle,
+  Clock,
+  AlertCircle,
+  Loader2,
+  X,
+  MoreVertical,
+} from "lucide-react";
 import { twMerge } from "tailwind-merge";
 import {
   useGetFormsQuery,
@@ -13,6 +22,19 @@ const ClientQueries = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [selectedFormId, setSelectedFormId] = useState(null);
+  const [openActionId, setOpenActionId] = useState(null);
+
+  useEffect(() => {
+    const handleOutsideClick = (event) => {
+      if (event.target.closest('[data-actions-menu="true"]')) return;
+      setOpenActionId(null);
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, []);
 
   const { data, isLoading, isError, error } = useGetFormsQuery({
     page: 1,
@@ -161,20 +183,27 @@ const ClientQueries = () => {
             {error?.data?.message || "Failed to fetch queries"}
           </div>
         ) : (
-          <table className="w-full text-sm text-left">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[1900px] text-sm text-left">
             <thead className="bg-dark-800 text-text-muted font-medium uppercase text-xs tracking-wider">
               <tr>
                 <th className="px-6 py-4">Form ID</th>
                 <th className="px-6 py-4">Name</th>
                 <th className="px-6 py-4">Email</th>
+                <th className="px-6 py-4">Website</th>
+                <th className="px-6 py-4">City</th>
+                <th className="px-6 py-4">State</th>
                 <th className="px-6 py-4">Country</th>
+                <th className="px-6 py-4">Company Type</th>
+                <th className="px-6 py-4">Interested Projects</th>
+                <th className="px-6 py-4">Preferred City</th>
                 <th className="px-6 py-4">Status</th>
                 <th className="px-6 py-4">Created At</th>
                 <th className="px-6 py-4">Updated At</th>
-                    <th className="px-6 py-4">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-dark-600/30">
+                <th className="px-6 py-4 sticky right-0 bg-dark-800">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-dark-600/30">
               {filteredForms.map((form) => (
                 <tr key={form._id} className="hover:bg-dark-800/50 transition-colors">
                   <td className="px-6 py-4 font-mono text-primary">{form.formId}</td>
@@ -182,7 +211,13 @@ const ClientQueries = () => {
                     {[form.firstName, form.lastName].filter(Boolean).join(" ") || "-"}
                   </td>
                   <td className="px-6 py-4 text-text-muted">{form.email || "-"}</td>
+                  <td className="px-6 py-4 text-text-muted">{form.website || "-"}</td>
+                  <td className="px-6 py-4 text-text-muted">{form.city || "-"}</td>
+                  <td className="px-6 py-4 text-text-muted">{form.state || "-"}</td>
                   <td className="px-6 py-4 text-text-muted">{form.country || "-"}</td>
+                  <td className="px-6 py-4 text-text-muted">{form.companyType || "-"}</td>
+                  <td className="px-6 py-4 text-text-muted">{form.interestedProjects || "-"}</td>
+                  <td className="px-6 py-4 text-text-muted">{form.preferredCity || "-"}</td>
                   <td className="px-6 py-4">
                     <span
                       className={twMerge(
@@ -199,55 +234,87 @@ const ClientQueries = () => {
                   <td className="px-6 py-4 text-text-muted">
                     {form.updatedAt ? new Date(form.updatedAt).toLocaleString() : "-"}
                   </td>
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-2 flex-wrap">
+                  <td className="px-6 py-4 sticky right-0 bg-dark-900">
+                    <div className="relative inline-block" data-actions-menu="true">
                       <button
-                        onClick={() => handleView(form.formId)}
-                        className="text-primary hover:text-primary-light font-medium text-xs uppercase tracking-wide"
+                        onClick={() =>
+                          setOpenActionId((prev) => (prev === form._id ? null : form._id))
+                        }
+                        className="p-2 rounded-lg border border-dark-500 hover:border-primary text-text-muted hover:text-text-primary"
+                        aria-label="Open actions menu"
                       >
-                        View
+                        <MoreVertical className="w-4 h-4" />
                       </button>
-                      <button
-                        onClick={() => handleStatusChange(form._id, "NEW")}
-                        disabled={isUpdatingStatus}
-                        className="text-xs px-2 py-1 rounded border border-dark-500 hover:border-primary disabled:opacity-60"
-                      >
-                        Mark NEW
-                      </button>
-                      <button
-                        onClick={() => handleStatusChange(form._id, "IN_PROGRESS")}
-                        disabled={isUpdatingStatus}
-                        className="text-xs px-2 py-1 rounded border border-dark-500 hover:border-primary disabled:opacity-60"
-                      >
-                        Mark IN_PROGRESS
-                      </button>
-                      <button
-                        onClick={() => handleStatusChange(form._id, "RESOLVED")}
-                        disabled={isUpdatingStatus}
-                        className="text-xs px-2 py-1 rounded border border-dark-500 hover:border-primary disabled:opacity-60"
-                      >
-                        Mark RESOLVED
-                      </button>
-                      <button
-                        onClick={() => handleAssign(form._id)}
-                        disabled={isAssigning}
-                        className="text-xs px-2 py-1 rounded border border-dark-500 hover:border-primary disabled:opacity-60"
-                      >
-                        Assign
-                      </button>
-                      <button
-                        onClick={() => handleDelete(form._id)}
-                        disabled={isDeleting}
-                        className="text-xs px-2 py-1 rounded border border-red-500/40 text-red-400 hover:bg-red-500/10 disabled:opacity-60"
-                      >
-                        Delete
-                      </button>
+                      {openActionId === form._id ? (
+                        <div className="absolute right-0 mt-2 w-44 bg-dark-800 border border-dark-600 rounded-xl shadow-xl z-20 p-2 space-y-1">
+                          <button
+                            onClick={() => {
+                              handleView(form.formId);
+                              setOpenActionId(null);
+                            }}
+                            className="w-full text-left text-xs px-2 py-2 rounded hover:bg-dark-700"
+                          >
+                            View
+                          </button>
+                          <button
+                            onClick={() => {
+                              handleStatusChange(form._id, "NEW");
+                              setOpenActionId(null);
+                            }}
+                            disabled={isUpdatingStatus}
+                            className="w-full text-left text-xs px-2 py-2 rounded hover:bg-dark-700 disabled:opacity-60"
+                          >
+                            Mark NEW
+                          </button>
+                          <button
+                            onClick={() => {
+                              handleStatusChange(form._id, "IN_PROGRESS");
+                              setOpenActionId(null);
+                            }}
+                            disabled={isUpdatingStatus}
+                            className="w-full text-left text-xs px-2 py-2 rounded hover:bg-dark-700 disabled:opacity-60"
+                          >
+                            Mark IN_PROGRESS
+                          </button>
+                          <button
+                            onClick={() => {
+                              handleStatusChange(form._id, "RESOLVED");
+                              setOpenActionId(null);
+                            }}
+                            disabled={isUpdatingStatus}
+                            className="w-full text-left text-xs px-2 py-2 rounded hover:bg-dark-700 disabled:opacity-60"
+                          >
+                            Mark RESOLVED
+                          </button>
+                          <button
+                            onClick={() => {
+                              handleAssign(form._id);
+                              setOpenActionId(null);
+                            }}
+                            disabled={isAssigning}
+                            className="w-full text-left text-xs px-2 py-2 rounded hover:bg-dark-700 disabled:opacity-60"
+                          >
+                            Assign
+                          </button>
+                          <button
+                            onClick={() => {
+                              handleDelete(form._id);
+                              setOpenActionId(null);
+                            }}
+                            disabled={isDeleting}
+                            className="w-full text-left text-xs px-2 py-2 rounded text-red-400 hover:bg-red-500/10 disabled:opacity-60"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      ) : null}
                     </div>
                   </td>
                 </tr>
               ))}
             </tbody>
-          </table>
+            </table>
+          </div>
         )}
       </div>
 
@@ -279,7 +346,28 @@ const ClientQueries = () => {
                 <span className="text-text-muted">Email:</span> {selectedForm.email || "-"}
               </p>
               <p>
+                <span className="text-text-muted">Website:</span> {selectedForm.website || "-"}
+              </p>
+              <p>
+                <span className="text-text-muted">City:</span> {selectedForm.city || "-"}
+              </p>
+              <p>
+                <span className="text-text-muted">State:</span> {selectedForm.state || "-"}
+              </p>
+              <p>
                 <span className="text-text-muted">Country:</span> {selectedForm.country || "-"}
+              </p>
+              <p>
+                <span className="text-text-muted">Company Type:</span>{" "}
+                {selectedForm.companyType || "-"}
+              </p>
+              <p>
+                <span className="text-text-muted">Interested Projects:</span>{" "}
+                {selectedForm.interestedProjects || "-"}
+              </p>
+              <p>
+                <span className="text-text-muted">Preferred City:</span>{" "}
+                {selectedForm.preferredCity || "-"}
               </p>
               <p>
                 <span className="text-text-muted">Status:</span> {selectedForm.status}
@@ -306,6 +394,7 @@ const ClientQueries = () => {
           )}
         </div>
       ) : null}
+
     </div>
   );
 };
