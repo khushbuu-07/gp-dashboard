@@ -3,11 +3,11 @@ export const ROLE_ACCESS = {
 
   ADMIN: [
     "overview",
-    "sales",
+    // "sales",
     "operations",
     "clients",
     "finance",
-    "performance",
+    // "performance",
     "identity",
     "blogs"
   ],
@@ -15,7 +15,9 @@ export const ROLE_ACCESS = {
   SALES_MANAGER: [
     "overview",
     "sales",
-    "clients"
+    "clients",
+    "blogs",
+
   ],
 
   OPERATIONS_MANAGER: [
