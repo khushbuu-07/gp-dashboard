@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { 
+import {
     Search, Filter, Download, Edit, Trash2, Plus, 
     ChevronLeft, ChevronRight, Clock, Globe, FileText,
     Image, MoreVertical, Eye, Copy, Archive, RefreshCw,
