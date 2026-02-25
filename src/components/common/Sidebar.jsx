@@ -56,7 +56,7 @@ const Sidebar = ({ className }) => {
   return (
     <aside
       className={twMerge(
-        "fixed left-0 top-0 h-screen w-[23rem] bg-dark-850 border-r border-dark-600/30 flex flex-col",
+        "fixed left-0 top-0 h-screen w-[23rem] overflow-hidden overflow-y-auto bg-dark-850 border-r border-dark-600/30 flex flex-col",
         className
       )}
     >
