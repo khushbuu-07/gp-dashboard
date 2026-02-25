@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-const BASE_URL = 'https://global-project-ek8i.onrender.com/api/v1/';
+const BASE_URL = 'http://localhost:5000/api/v1/';
 
 export const apiSlice = createApi({
   reducerPath: 'api',
