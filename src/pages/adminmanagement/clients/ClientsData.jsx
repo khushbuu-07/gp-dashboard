@@ -24,26 +24,30 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   useGetClientsQuery,
   useAddClientMutation,
+  useUpdateClientMutation,
 } from "../../../redux/api/clientApiSlice";
 
 const statusClass = {
-  ACTIVE:
+  active:
     "bg-emerald-500/10 text-emerald-400 border-emerald-500/20 ring-1 ring-emerald-500/20",
-  INACTIVE:
+  prospect:
+    "bg-amber-500/10 text-amber-400 border-amber-500/20 ring-1 ring-amber-500/20",
+  inactive:
     "bg-rose-500/10 text-rose-400 border-rose-500/20 ring-1 ring-rose-500/20",
-  DEAL: "bg-amber-500/10 text-amber-400 border-amber-500/20 ring-1 ring-amber-500/20",
 };
 
 const statusIcons = {
-  ACTIVE: "●",
-  INACTIVE: "○",
-  DEAL: "★",
+  active: "●",
+  prospect: "★",
+  inactive: "○",
 };
+
+const normalizeStatus = (status) => String(status || "active").toLowerCase();
 
 const ClientsData = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("ALL");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   const [formData, setFormData] = useState({
     name: "",
@@ -54,8 +58,16 @@ const ClientsData = () => {
     location: "",
     dateOfCall: "",
     attendedBy: "",
-    status: "ACTIVE",
+    status: "active",
     remarks: "",
+  });
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editingClientId, setEditingClientId] = useState(null);
+  const [editFormData, setEditFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    status: "active",
   });
 
   const { data, isLoading, isError, error } = useGetClientsQuery({
@@ -63,6 +75,7 @@ const ClientsData = () => {
     limit: 1000,
   });
   const [addClient, { isLoading: isAdding }] = useAddClientMutation();
+  const [updateClient, { isLoading: isUpdating }] = useUpdateClientMutation();
 
   const rows = useMemo(() => {
     const source = Array.isArray(data?.clients)
@@ -84,15 +97,12 @@ const ClientsData = () => {
       projectInterested:
         client.projectInterested || client.projectName || client.interestedProject || "",
       projectCode: client.projectCode || client.code || "",
-      location: client.location || client.city || "",
-      dateOfCall: client.dateOfCall
-        ? new Date(client.dateOfCall).toLocaleDateString("en-GB")
-        : client.callDate
-          ? new Date(client.callDate).toLocaleDateString("en-GB")
-        : "",
+      location: client.location || client.address?.city || client.city || "",
+      dateOfCall: client.date || client.dateOfCall || client.createdAt || "",
       attendedBy: client.attendedBy || client.callerName || "",
-      status: client.status || "ACTIVE",
-      remarks: client.remarks || client.note || "",
+      status: normalizeStatus(client.status),
+      remarks: client.remarks || client.note || client.notes || "",
+      raw: client,
     }));
   }, [data]);
 
@@ -113,25 +123,18 @@ const ClientsData = () => {
 
       await addClient({
         name: formData.name,
-        fullName: formData.name,
-        clientName: formData.name,
         phone: formData.mobile.trim(),
-        mobile: formData.mobile.trim(),
         email: formData.email,
+        company: formData.projectInterested || "",
         projectInterested: formData.projectInterested,
-        projectName: formData.projectInterested,
         projectCode: formData.projectCode,
-        code: formData.projectCode,
         location: formData.location,
-        city: formData.location,
-        dateOfCall: formData.dateOfCall || new Date().toISOString(),
-        callDate: formData.dateOfCall || new Date().toISOString(),
-        attendedBy: formData.attendedBy,
-        callerName: formData.attendedBy,
-        status: formData.status,
+        date: formData.dateOfCall || new Date().toISOString(),
+        attendedBy: formData.attendedBy || "",
+        status: normalizeStatus(formData.status),
         remarks: formData.remarks,
-        note: formData.remarks,
       }).unwrap();
+
       setFormData({
         name: "",
         mobile: "",
@@ -141,7 +144,7 @@ const ClientsData = () => {
         location: "",
         dateOfCall: "",
         attendedBy: "",
-        status: "ACTIVE",
+        status: "active",
         remarks: "",
       });
       setIsFormOpen(false);
@@ -151,12 +154,49 @@ const ClientsData = () => {
     }
   };
 
+  const handleOpenEdit = (row) => {
+    setEditingClientId(row._id);
+    setEditFormData({
+      name: row.name || "",
+      email: row.email || "",
+      phone: row.mobile || "",
+      status: normalizeStatus(row.status),
+    });
+    setIsEditOpen(true);
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    if (!editingClientId) return;
+    try {
+      await updateClient({
+        _id: editingClientId,
+        name: editFormData.name,
+        email: editFormData.email,
+        phone: editFormData.phone,
+        status: normalizeStatus(editFormData.status),
+      }).unwrap();
+      setIsEditOpen(false);
+      setEditingClientId(null);
+      setEditFormData({
+        name: "",
+        email: "",
+        phone: "",
+        status: "active",
+      });
+    } catch (err) {
+      console.error("Failed to update client:", err);
+      alert(err?.data?.message || "Failed to update client");
+    }
+  };
+
   const filteredRows = useMemo(() => {
     return rows.filter((row) => {
       const matchesSearch = Object.values(row).some((value) =>
         String(value).toLowerCase().includes(searchTerm.toLowerCase()),
       );
-      const matchesStatus = statusFilter === "ALL" || row.status === statusFilter;
+      const matchesStatus =
+        statusFilter === "all" || normalizeStatus(row.status) === statusFilter;
       return matchesSearch && matchesStatus;
     });
   }, [rows, searchTerm, statusFilter]);
@@ -164,9 +204,9 @@ const ClientsData = () => {
   const stats = useMemo(
     () => ({
       total: rows.length,
-      active: rows.filter((r) => r.status === "ACTIVE").length,
-      deals: rows.filter((r) => r.status === "DEAL").length,
-      inactive: rows.filter((r) => r.status === "INACTIVE").length,
+      active: rows.filter((r) => normalizeStatus(r.status) === "active").length,
+      prospects: rows.filter((r) => normalizeStatus(r.status) === "prospect").length,
+      inactive: rows.filter((r) => normalizeStatus(r.status) === "inactive").length,
     }),
     [rows],
   );
@@ -197,7 +237,7 @@ const ClientsData = () => {
           {[
             { label: "Total Clients", value: stats.total, color: "from-blue-500 to-cyan-500", icon: Users },
             { label: "Active", value: stats.active, color: "from-emerald-500 to-teal-500", icon: Activity },
-            { label: "Deals", value: stats.deals, color: "from-amber-500 to-orange-500", icon: Star },
+            { label: "Prospects", value: stats.prospects, color: "from-amber-500 to-orange-500", icon: Star },
             { label: "Inactive", value: stats.inactive, color: "from-rose-500 to-pink-500", icon: UserMinus },
           ].map((stat, idx) => (
             <motion.div
@@ -259,9 +299,9 @@ const ClientsData = () => {
                     onChange={handleChange}
                     className="col-span-1 bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
                   >
-                    <option value="ACTIVE">ACTIVE</option>
-                    <option value="INACTIVE">INACTIVE</option>
-                    <option value="DEAL">DEAL</option>
+                    <option value="active">active</option>
+                    <option value="prospect">prospect</option>
+                    <option value="inactive">inactive</option>
                   </select>
 
                   <textarea
@@ -279,6 +319,88 @@ const ClientsData = () => {
                   >
                     {isAdding ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
                     Add Client
+                  </button>
+                </form>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {isEditOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="overflow-hidden"
+            >
+              <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700 rounded-2xl p-6 shadow-2xl">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-xl font-semibold text-white">Edit Client</h2>
+                  <button
+                    onClick={() => {
+                      setIsEditOpen(false);
+                      setEditingClientId(null);
+                    }}
+                    className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
+                  >
+                    <X className="w-5 h-5 text-slate-400" />
+                  </button>
+                </div>
+
+                <form onSubmit={handleEditSubmit} className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <InputField
+                    icon={User}
+                    name="name"
+                    placeholder="Full Name"
+                    value={editFormData.name}
+                    onChange={(e) =>
+                      setEditFormData((prev) => ({ ...prev, name: e.target.value }))
+                    }
+                    required
+                  />
+                  <InputField
+                    icon={Mail}
+                    name="email"
+                    type="email"
+                    placeholder="Email Address"
+                    value={editFormData.email}
+                    onChange={(e) =>
+                      setEditFormData((prev) => ({ ...prev, email: e.target.value }))
+                    }
+                    required
+                  />
+                  <InputField
+                    icon={Phone}
+                    name="phone"
+                    placeholder="Phone Number"
+                    value={editFormData.phone}
+                    onChange={(e) =>
+                      setEditFormData((prev) => ({ ...prev, phone: e.target.value }))
+                    }
+                    required
+                  />
+                  <select
+                    name="status"
+                    value={editFormData.status}
+                    onChange={(e) =>
+                      setEditFormData((prev) => ({ ...prev, status: e.target.value }))
+                    }
+                    className="col-span-1 bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all"
+                  >
+                    <option value="active">active</option>
+                    <option value="prospect">prospect</option>
+                    <option value="inactive">inactive</option>
+                  </select>
+
+                  <button
+                    type="submit"
+                    disabled={isUpdating}
+                    className="col-span-1 md:col-span-4 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-bold py-3 rounded-xl hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-300 disabled:opacity-70 flex items-center justify-center gap-2"
+                  >
+                    {isUpdating ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
+                    Update Client
                   </button>
                 </form>
               </div>
@@ -304,10 +426,10 @@ const ClientsData = () => {
               onChange={(e) => setStatusFilter(e.target.value)}
               className="bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-blue-500 outline-none transition-all"
             >
-              <option value="ALL">All Status</option>
-              <option value="ACTIVE">Active</option>
-              <option value="INACTIVE">Inactive</option>
-              <option value="DEAL">Deal</option>
+              <option value="all">All Status</option>
+              <option value="active">Active</option>
+              <option value="prospect">Prospect</option>
+              <option value="inactive">Inactive</option>
             </select>
 
             <button className="p-3 bg-slate-800/50 border border-slate-700 rounded-xl hover:bg-slate-700/50 transition-colors">
@@ -357,7 +479,7 @@ const ClientsData = () => {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        transition={{ delay: idx * 0.05 }}
+                        transition={{ delay: idx * 0.02 }}
                         className="group hover:bg-slate-700/30 transition-colors"
                       >
                         <td className="px-4 py-4 text-slate-300">{row.sno}</td>
@@ -367,17 +489,21 @@ const ClientsData = () => {
                         <td className="hidden px-4 py-4 text-slate-300 lg:table-cell">{row.projectInterested}</td>
                         <td className="hidden px-4 py-4 text-slate-300 lg:table-cell">{row.projectCode}</td>
                         <td className="hidden px-4 py-4 text-slate-300 xl:table-cell">{row.location}</td>
-                        <td className="hidden px-4 py-4 text-slate-300 xl:table-cell">{row.dateOfCall}</td>
-                        <td className="hidden px-4 py-4 text-slate-300 xl:table-cell">{row.attendedBy}</td>
+                        <td className="hidden px-4 py-4 text-slate-300 xl:table-cell">
+                          {row.dateOfCall ? new Date(row.dateOfCall).toLocaleDateString("en-GB") : "-"}
+                        </td>
+                        <td className="hidden px-4 py-4 text-slate-300 xl:table-cell">{row.attendedBy || "-"}</td>
                         <td className="px-4 py-4">
                           <span
                             className={twMerge(
                               "inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium border",
-                              statusClass[row.status] || statusClass.ACTIVE,
+                              statusClass[normalizeStatus(row.status)] || statusClass.active,
                             )}
                           >
-                            <span className="text-lg">{statusIcons[row.status] || statusIcons.ACTIVE}</span>
-                            {row.status}
+                            <span className="text-lg">
+                              {statusIcons[normalizeStatus(row.status)] || statusIcons.active}
+                            </span>
+                            {normalizeStatus(row.status)}
                           </span>
                         </td>
                         <td className="hidden max-w-[200px] truncate px-4 py-4 text-slate-300 lg:table-cell">
@@ -385,7 +511,11 @@ const ClientsData = () => {
                         </td>
                         <td className="px-4 py-4">
                           <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button className="p-2 bg-slate-700 rounded-lg hover:bg-slate-600 transition-colors">
+                            <button
+                              onClick={() => handleOpenEdit(row)}
+                              disabled={isUpdating}
+                              className="p-2 bg-slate-700 rounded-lg hover:bg-slate-600 transition-colors disabled:opacity-60"
+                            >
                               <Pencil className="w-4 h-4 text-slate-300" />
                             </button>
                             <button className="p-2 bg-slate-700 rounded-lg hover:bg-slate-600 transition-colors">
