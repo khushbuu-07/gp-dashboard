@@ -43,7 +43,7 @@ export const SIDEBAR_CONFIG = [
       { key: "opportunities", label: "Opportunities", path: "/sales/opportunities", icon: Briefcase },
       { key: "pipeline", label: "Deal Pipeline", path: "/sales/pipeline", icon: Briefcase },
       { key: "closedDeals", label: "Closed Deals", path: "/sales/closed", icon: Briefcase },
-      { key: "projects", label: "Manage Projects", path: "/management/projects", icon: FolderOpen }
+      
     ]
   },
 
@@ -54,8 +54,9 @@ export const SIDEBAR_CONFIG = [
     icon: Briefcase,
     section: "OPERATIONS",
     children: [
-      { key: "activeProjects", label: "Active Projects", path: "/management/projects", icon: Briefcase },
-      { key: "archivedProjects", label: "Archived Projects", path: "/operations/archived", icon: Briefcase }
+      { key: "projects", label: "Active Projects", path: "/management/projects", icon: Briefcase },
+      { key: "archivedProjects", label: "Archived Projects", path: "/operations/archived", icon: Briefcase },
+      { key: "ManageProjects", label: "Manage Projects", path: "/management/projects", icon: FolderOpen }
     ]
   },
 
