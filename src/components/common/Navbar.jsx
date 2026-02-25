@@ -5,6 +5,13 @@ import { twMerge } from 'tailwind-merge';
 
 const Navbar = () => {
     const { user, logout } = useAuth();
+    
+    // Handle both direct user object and nested user structure
+    // When login stores response.data, it's { user: { id, name, email, role }, token }
+    const actualUser = user?.user || user;
+    const userName = actualUser?.name;
+    const userRole = actualUser?.role;
+    
     const [active, setActive] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const profileRef = useRef(null);
@@ -103,7 +110,7 @@ const Navbar = () => {
                         >
                             <div className="text-right hidden sm:block">
                                 <p className="text-sm font-bold text-text-primary group-hover:text-primary transition-colors [.light_&]:text-slate-900">{user?.name || 'Admin User'}</p>
-                                <p className="text-[10px] text-text-muted font-bold tracking-wide uppercase">{user?.role || 'Admin'}</p>
+                                <p className="text-[10px] text-text-muted font-bold tracking-wide uppercase">{user?.role ? user.role.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Admin'}</p>
                             </div>
                             <div className="relative">
                                 <div className="w-10 h-10 rounded-xl bg-dark-700 p-0.5 border border-dark-600 overflow-hidden group-hover:scale-105 transition-transform group-hover:border-primary [.light_&]:bg-slate-100 [.light_&]:border-slate-200">

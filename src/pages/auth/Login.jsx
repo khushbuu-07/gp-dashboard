@@ -21,6 +21,7 @@ const Login = () => {
 
         try {
             const response = await loginMutation({ email, password }).unwrap();
+            // Store the entire data object (contains both user and token)
             dispatch(loginSuccess(response.data));
             navigate('/');
         } catch (err) {
