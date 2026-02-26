@@ -527,7 +527,7 @@ const ClientsData = () => {
                           {row.remarks}
                         </td>
                         <td className="px-4 py-4">
-                          <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="flex gap-2">
                             <button
                               onClick={() => handleOpenEdit(row)}
                               disabled={isUpdating}

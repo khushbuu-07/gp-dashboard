@@ -313,7 +313,6 @@ const ManageProjects = () => {
   );
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure?")) return;
     try {
       await deleteProject(id).unwrap();
       toast.success("Project deleted successfully");

@@ -62,7 +62,6 @@ const ClientCallbackData = () => {
     }, [rows, searchApplied]);
 
     const handleDelete = async (id) => {
-        if (!window.confirm("Delete this callback request?")) return;
         try {
             await deleteRequestCall(id).unwrap();
             refetch();
