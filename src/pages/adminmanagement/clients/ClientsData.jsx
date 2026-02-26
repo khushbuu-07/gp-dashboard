@@ -80,7 +80,9 @@ const ClientsData = () => {
   const hasShownLoadToast = useRef(false);
 
   const rows = useMemo(() => {
-    const source = Array.isArray(data?.clients)
+    const source = Array.isArray(data?.message?.clients)
+      ? data.message.clients
+      : Array.isArray(data?.clients)
       ? data.clients
       : Array.isArray(data?.data?.clients)
         ? data.data.clients
@@ -527,7 +529,7 @@ const ClientsData = () => {
                           {row.remarks}
                         </td>
                         <td className="px-4 py-4">
-                          <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="flex gap-2">
                             <button
                               onClick={() => handleOpenEdit(row)}
                               disabled={isUpdating}
