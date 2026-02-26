@@ -3,7 +3,6 @@ import {
   Plus,
   ChevronDown,
   ChevronUp,
-  RefreshCcw,
   Activity,
   IndianRupee,
   CalendarClock,
@@ -12,7 +11,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 
 /* =======================
-   STATUS COLORS
+   STATUS COLORS (Unified)
 ======================= */
 const statusColors = {
   Active: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
@@ -33,9 +32,6 @@ const ManageRecurringPayouts = () => {
   const [expanded, setExpanded] = useState(null);
   const [form, setForm] = useState(emptyForm);
 
-  /* =======================
-     HANDLERS
-  ======================= */
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -61,9 +57,6 @@ const ManageRecurringPayouts = () => {
     setOpen(false);
   };
 
-  /* =======================
-     STATS
-  ======================= */
   const stats = useMemo(() => {
     const total = payouts.length;
     const active = payouts.filter((p) => p.status === "Active").length;
@@ -87,19 +80,24 @@ const ManageRecurringPayouts = () => {
     <motion.div
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
-      className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900/10 to-slate-900 p-6"
+      className="min-h-screen bg-dark-900 p-6 text-text-primary"
     >
       <div className="max-w-7xl mx-auto space-y-6">
 
         {/* HEADER */}
-        <div className="flex justify-between items-center">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-teal-400 to-cyan-400 bg-clip-text text-transparent">
-            Recurring Payouts
-          </h1>
+        <div className="flex justify-between items-center border-b border-dark-600 pb-6">
+          <div>
+            <h1 className="text-4xl font-extrabold tracking-tight">
+              Recurring Payouts
+            </h1>
+            <p className="text-text-muted text-sm">
+              Automated monthly revenue tracking
+            </p>
+          </div>
 
           <button
             onClick={() => setOpen(!open)}
-            className="px-6 py-3 bg-gradient-to-r from-teal-500 to-cyan-500 rounded-xl text-white font-semibold"
+            className="px-6 py-3 bg-primary hover:bg-primary-dark rounded-xl text-white font-semibold transition"
           >
             <Plus className="inline mr-2" />
             Add Recurring Payout
@@ -124,13 +122,13 @@ const ManageRecurringPayouts = () => {
           ].map((s, i) => (
             <div
               key={i}
-              className="bg-slate-800/50 border border-slate-700 rounded-2xl p-6 flex justify-between items-center"
+              className="bg-dark-800/60 border border-dark-600/50 rounded-2xl p-6 flex justify-between items-center"
             >
               <div>
-                <p className="text-slate-400 text-sm">{s.label}</p>
-                <p className="text-3xl font-bold text-white">{s.value}</p>
+                <p className="text-text-muted text-sm">{s.label}</p>
+                <p className="text-3xl font-black">{s.value}</p>
               </div>
-              <s.icon className="w-8 h-8 text-teal-400" />
+              <s.icon className="w-8 h-8 text-primary" />
             </div>
           ))}
         </div>
@@ -143,14 +141,14 @@ const ManageRecurringPayouts = () => {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              className="bg-slate-800/50 border border-slate-700 rounded-2xl p-6 grid grid-cols-1 md:grid-cols-3 gap-4"
+              className="bg-dark-800/60 border border-dark-600/50 rounded-2xl p-6 grid grid-cols-1 md:grid-cols-3 gap-4"
             >
               <input
                 name="client"
                 value={form.client}
                 onChange={handleChange}
                 placeholder="Client Name"
-                className="bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white"
+                className="bg-dark-900 border border-dark-700 rounded-xl px-4 py-3 text-text-primary placeholder-text-muted"
               />
 
               <input
@@ -158,7 +156,7 @@ const ManageRecurringPayouts = () => {
                 value={form.amount}
                 onChange={handleChange}
                 placeholder="Monthly Amount"
-                className="bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white"
+                className="bg-dark-900 border border-dark-700 rounded-xl px-4 py-3 text-text-primary"
               />
 
               <input
@@ -166,14 +164,14 @@ const ManageRecurringPayouts = () => {
                 name="nextDue"
                 value={form.nextDue}
                 onChange={handleChange}
-                className="bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white"
+                className="bg-dark-900 border border-dark-700 rounded-xl px-4 py-3 text-text-primary"
               />
 
               <select
                 name="mode"
                 value={form.mode}
                 onChange={handleChange}
-                className="bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white"
+                className="bg-dark-900 border border-dark-700 rounded-xl px-4 py-3 text-text-primary"
               >
                 <option>Auto</option>
                 <option>Manual</option>
@@ -183,13 +181,13 @@ const ManageRecurringPayouts = () => {
                 name="status"
                 value={form.status}
                 onChange={handleChange}
-                className="bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white"
+                className="bg-dark-900 border border-dark-700 rounded-xl px-4 py-3 text-text-primary"
               >
                 <option>Active</option>
                 <option>Paused</option>
               </select>
 
-              <button className="md:col-span-3 bg-teal-500 py-3 rounded-xl text-white font-bold">
+              <button className="md:col-span-3 bg-primary py-3 rounded-xl text-white font-bold">
                 Save Recurring Payout
               </button>
             </motion.form>
@@ -197,21 +195,14 @@ const ManageRecurringPayouts = () => {
         </AnimatePresence>
 
         {/* TABLE */}
-        <div className="overflow-x-auto bg-slate-800/60 border border-slate-700 rounded-2xl">
+        <div className="overflow-x-auto bg-dark-800/60 border border-dark-600/50 rounded-2xl">
           <table className="min-w-full text-sm">
-            <thead className="bg-slate-900/70">
+            <thead className="bg-dark-900/70">
               <tr>
-                {[
-                  "Client",
-                  "Monthly Amount",
-                  "Next Due",
-                  "Mode",
-                  "Status",
-                  "History",
-                ].map((h) => (
+                {["Client","Monthly Amount","Next Due","Mode","Status","History"].map(h => (
                   <th
                     key={h}
-                    className="px-4 py-3 text-left text-xs uppercase text-slate-400"
+                    className="px-4 py-3 text-left text-xs uppercase text-text-muted"
                   >
                     {h}
                   </th>
@@ -219,43 +210,31 @@ const ManageRecurringPayouts = () => {
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-slate-700">
+            <tbody className="divide-y divide-dark-700">
               {payouts.map((p) => (
                 <React.Fragment key={p.id}>
-                  <tr className="hover:bg-slate-700/30">
-                    <td className="px-4 py-3 text-white">{p.client}</td>
+                  <tr className="hover:bg-dark-700/40 transition">
+                    <td className="px-4 py-3">{p.client}</td>
                     <td className="px-4 py-3 text-emerald-400 font-semibold">
                       ₹{p.amount}
                     </td>
-                    <td className="px-4 py-3 text-slate-300">
+                    <td className="px-4 py-3 text-text-secondary">
                       {new Date(p.nextDue).toLocaleDateString()}
                     </td>
-                    <td className="px-4 py-3 text-slate-300">{p.mode}</td>
+                    <td className="px-4 py-3 text-text-secondary">{p.mode}</td>
                     <td className="px-4 py-3">
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs border ${
-                          statusColors[p.status]
-                        }`}
-                      >
+                      <span className={`px-3 py-1 rounded-full text-xs border ${statusColors[p.status]}`}>
                         {p.status}
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <button
-                        onClick={() =>
-                          setExpanded(expanded === p.id ? null : p.id)
-                        }
-                      >
-                        {expanded === p.id ? (
-                          <ChevronUp className="w-4" />
-                        ) : (
-                          <ChevronDown className="w-4" />
-                        )}
+                      <button onClick={() => setExpanded(expanded === p.id ? null : p.id)}>
+                        {expanded === p.id ? <ChevronUp /> : <ChevronDown />}
                       </button>
                     </td>
                   </tr>
 
-                  {/* PAYMENT HISTORY */}
+                  {/* EXPANDED HISTORY */}
                   <AnimatePresence>
                     {expanded === p.id && (
                       <motion.tr
@@ -263,22 +242,22 @@ const ManageRecurringPayouts = () => {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                       >
-                        <td colSpan={6} className="px-6 py-4 bg-slate-900/50">
-                          <h4 className="text-slate-300 text-sm mb-2">
+                        <td
+                          colSpan={6}
+                          className="px-6 py-4 bg-dark-950/80 border-t border-dark-700"
+                        >
+                          <h4 className="text-text-secondary text-sm mb-2">
                             Payment History
                           </h4>
+
                           {p.history.map((h, i) => (
                             <div
                               key={i}
-                              className="flex justify-between text-sm text-slate-400 mb-1"
+                              className="flex justify-between text-sm text-text-muted mb-1"
                             >
-                              <span>
-                                {new Date(h.date).toLocaleDateString()}
-                              </span>
+                              <span>{new Date(h.date).toLocaleDateString()}</span>
                               <span>₹{h.amount}</span>
-                              <span className="text-emerald-400">
-                                {h.status}
-                              </span>
+                              <span className="text-emerald-400">{h.status}</span>
                             </div>
                           ))}
                         </td>
@@ -291,7 +270,7 @@ const ManageRecurringPayouts = () => {
           </table>
 
           {payouts.length === 0 && (
-            <div className="py-12 text-center text-slate-400">
+            <div className="py-12 text-center text-text-muted">
               No recurring payouts found
             </div>
           )}

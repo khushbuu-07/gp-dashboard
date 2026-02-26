@@ -3,7 +3,6 @@ import {
   Plus,
   Edit,
   Trash2,
-  X,
   FileText,
   Activity,
   CheckCircle,
@@ -14,7 +13,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 
 /* =======================
-   STATUS COLORS
+   STATUS COLORS (Unified)
 ======================= */
 const statusColors = {
   Active: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
@@ -36,59 +35,28 @@ const ManageContracts = () => {
   const [contracts, setContracts] = useState([]);
   const [form, setForm] = useState(emptyForm);
   const [open, setOpen] = useState(false);
-  const [editId, setEditId] = useState(null);
   const [page, setPage] = useState(1);
-  const [entries, setEntries] = useState(10);
+  const entries = 10;
 
-  /* =======================
-     HANDLERS
-  ======================= */
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    if (editId) {
-      setContracts((prev) =>
-        prev.map((c) => (c.id === editId ? { ...c, ...form } : c))
-      );
-    } else {
-      setContracts([{ id: Date.now(), ...form }, ...contracts]);
-    }
-
+    setContracts([{ id: Date.now(), ...form }, ...contracts]);
     setForm(emptyForm);
-    setEditId(null);
     setOpen(false);
   };
 
-  const handleEdit = (contract) => {
-    setForm(contract);
-    setEditId(contract.id);
-    setOpen(true);
-  };
-
-  const handleDelete = (id) =>
-    setContracts((prev) => prev.filter((c) => c.id !== id));
-
-  /* =======================
-     STATS
-  ======================= */
   const stats = useMemo(() => {
-    const total = contracts.length;
-    const active = contracts.filter((c) => c.status === "Active").length;
-    const completed = contracts.filter((c) => c.status === "Completed").length;
-    const totalValue = contracts.reduce(
-      (sum, c) => sum + Number(c.value || 0),
-      0
-    );
-
-    return { total, active, completed, totalValue };
+    return {
+      total: contracts.length,
+      active: contracts.filter((c) => c.status === "Active").length,
+      completed: contracts.filter((c) => c.status === "Completed").length,
+      totalValue: contracts.reduce((s, c) => s + Number(c.value || 0), 0),
+    };
   }, [contracts]);
 
-  /* =======================
-     PAGINATION
-  ======================= */
   const totalPages = Math.ceil(contracts.length / entries);
   const paginated = contracts.slice(
     (page - 1) * entries,
@@ -96,222 +64,154 @@ const ManageContracts = () => {
   );
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900/10 to-slate-900 p-6"
-    >
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="space-y-8 pt-6 animate-fade-in text-text-primary pb-10">
 
-        {/* HEADER */}
-        <div className="flex justify-between items-center">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-amber-400 to-cyan-400 bg-clip-text text-transparent">
-            Contracts
+      {/* HEADER */}
+      <div className="flex justify-between items-end border-b border-dark-600 pb-6">
+        <div>
+          <h1 className="text-4xl font-extrabold tracking-tight mb-1">
+            Contract Management
           </h1>
+          <p className="text-text-muted text-sm">
+            Centralized control of all active and completed contracts
+          </p>
+        </div>
 
-          <button
-            onClick={() => setOpen(!open)}
-            className="px-6 py-3 bg-gradient-to-r from-amber-500 to-cyan-500 rounded-xl text-white font-semibold"
+        <button
+          onClick={() => setOpen(!open)}
+          className="flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-xl text-sm font-bold shadow-lg shadow-primary/20 transition-all active:scale-95"
+        >
+          <Plus className="w-4 h-4" /> New Contract
+        </button>
+      </div>
+
+      {/* STATS */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {[
+          { label: "Total Contracts", value: stats.total, icon: FileText },
+          { label: "Active", value: stats.active, icon: Activity },
+          { label: "Completed", value: stats.completed, icon: CheckCircle },
+          { label: "Total Value", value: `₹${stats.totalValue}`, icon: IndianRupee },
+        ].map((s, i) => (
+          <div
+            key={i}
+            className="bg-dark-800 p-6 rounded-3xl border border-dark-600/50 shadow-xl"
           >
-            <Plus className="inline mr-2" />
-            Add Contract
-          </button>
-        </div>
-
-        {/* STATS SECTION */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-          {[
-            { label: "Total Contracts", value: stats.total, icon: FileText },
-            { label: "Active", value: stats.active, icon: Activity },
-            { label: "Completed", value: stats.completed, icon: CheckCircle },
-            {
-              label: "Total Value",
-              value: `₹${stats.totalValue}`,
-              icon: IndianRupee,
-            },
-          ].map((s, i) => (
-            <div
-              key={i}
-              className="bg-slate-800/50 border border-slate-700 rounded-2xl p-6 flex justify-between items-center"
-            >
+            <div className="flex justify-between items-center">
               <div>
-                <p className="text-slate-400 text-sm">{s.label}</p>
-                <p className="text-3xl font-bold text-white">{s.value}</p>
+                <p className="text-xs uppercase tracking-wider text-text-muted">
+                  {s.label}
+                </p>
+                <h3 className="text-3xl font-black mt-1">{s.value}</h3>
               </div>
-              <s.icon className="w-8 h-8 text-amber-400" />
+              <div className="p-3 bg-primary/10 rounded-xl text-primary">
+                <s.icon className="w-6 h-6" />
+              </div>
             </div>
-          ))}
-        </div>
-
-        {/* FORM (Same Page) */}
-        <AnimatePresence>
-          {open && (
-            <motion.form
-              onSubmit={handleSubmit}
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="bg-slate-800/50 border border-slate-700 rounded-2xl p-6 grid grid-cols-1 md:grid-cols-3 gap-4"
-            >
-              {[
-                ["contractId", "Contract ID"],
-                ["client", "Client Name"],
-                ["value", "Total Value"],
-                ["paymentTerms", "Payment Terms"],
-              ].map(([name, label]) => (
-                <input
-                  key={name}
-                  name={name}
-                  value={form[name]}
-                  onChange={handleChange}
-                  placeholder={label}
-                  className="bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white"
-                />
-              ))}
-
-              <input
-                type="date"
-                name="startDate"
-                value={form.startDate}
-                onChange={handleChange}
-                className="bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white"
-              />
-
-              <input
-                type="date"
-                name="endDate"
-                value={form.endDate}
-                onChange={handleChange}
-                className="bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white"
-              />
-
-              <select
-                name="status"
-                value={form.status}
-                onChange={handleChange}
-                className="bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white"
-              >
-                {Object.keys(statusColors).map((s) => (
-                  <option key={s}>{s}</option>
-                ))}
-              </select>
-
-              <button className="md:col-span-3 bg-amber-500 py-3 rounded-xl text-white font-bold">
-                Save Contract
-              </button>
-            </motion.form>
-          )}
-        </AnimatePresence>
-
-        {/* TABLE */}
-        <div className="overflow-x-auto bg-slate-800/60 border border-slate-700 rounded-2xl">
-          <table className="min-w-full text-sm">
-            <thead className="bg-slate-900/70">
-              <tr>
-                {[
-                  "Contract ID",
-                  "Client",
-                  "Value",
-                  "Payment Terms",
-                  "Duration",
-                  "Status",
-                  "Actions",
-                ].map((h) => (
-                  <th
-                    key={h}
-                    className="px-4 py-3 text-left text-xs uppercase text-slate-400"
-                  >
-                    {h}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-
-            <tbody className="divide-y divide-slate-700">
-              <AnimatePresence>
-                {paginated.map((c) => (
-                  <motion.tr
-                    key={c.id}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="group hover:bg-slate-700/30"
-                  >
-                    <td className="px-4 py-3 text-white">{c.contractId}</td>
-                    <td className="px-4 py-3 text-slate-300">{c.client}</td>
-                    <td className="px-4 py-3 text-emerald-400 font-semibold">
-                      ₹{c.value}
-                    </td>
-                    <td className="px-4 py-3 text-slate-300">
-                      {c.paymentTerms}
-                    </td>
-                    <td className="px-4 py-3 text-slate-300">
-                      {c.startDate} – {c.endDate}
-                    </td>
-
-                    <td className="px-4 py-3">
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs border ${
-                          statusColors[c.status]
-                        }`}
-                      >
-                        {c.status}
-                      </span>
-                    </td>
-
-                    <td className="px-4 py-3">
-                      <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition">
-                        <button onClick={() => handleEdit(c)}>
-                          <Edit className="w-4 text-slate-300" />
-                        </button>
-                        <button onClick={() => handleDelete(c.id)}>
-                          <Trash2 className="w-4 text-rose-400" />
-                        </button>
-                      </div>
-                    </td>
-                  </motion.tr>
-                ))}
-              </AnimatePresence>
-            </tbody>
-          </table>
-
-          {contracts.length === 0 && (
-            <div className="py-12 text-center text-slate-400">
-              No contracts found
-            </div>
-          )}
-        </div>
-
-        {/* PAGINATION */}
-        <div className="flex justify-between text-slate-400 text-sm">
-          <span>
-            Showing {(page - 1) * entries + 1} to{" "}
-            {Math.min(page * entries, contracts.length)} of{" "}
-            {contracts.length}
-          </span>
-
-          <div className="flex gap-2">
-            <button onClick={() => setPage((p) => Math.max(1, p - 1))}>
-              <ChevronLeft />
-            </button>
-            {[...Array(totalPages)].map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setPage(i + 1)}
-                className={page === i + 1 ? "text-amber-400" : ""}
-              >
-                {i + 1}
-              </button>
-            ))}
-            <button
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            >
-              <ChevronRight />
-            </button>
           </div>
+        ))}
+      </div>
+
+      {/* FORM */}
+      <AnimatePresence>
+        {open && (
+          <motion.form
+            onSubmit={handleSubmit}
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="bg-dark-800 p-6 rounded-3xl border border-dark-600/50 grid md:grid-cols-3 gap-4"
+          >
+            {[
+              ["contractId", "Contract ID"],
+              ["client", "Client Name"],
+              ["value", "Contract Value"],
+              ["paymentTerms", "Payment Terms"],
+            ].map(([name, label]) => (
+              <input
+                key={name}
+                name={name}
+                value={form[name]}
+                onChange={handleChange}
+                placeholder={label}
+                className="bg-dark-900 border border-dark-700 rounded-xl px-4 py-3 text-text-primary placeholder-text-muted"
+              />
+            ))}
+
+            <input type="date" name="startDate" onChange={handleChange} className="bg-dark-900 border border-dark-700 rounded-xl px-4 py-3 text-text-primary" />
+            <input type="date" name="endDate" onChange={handleChange} className="bg-dark-900 border border-dark-700 rounded-xl px-4 py-3 text-text-primary" />
+
+            <select
+              name="status"
+              value={form.status}
+              onChange={handleChange}
+              className="bg-dark-900 border border-dark-700 rounded-xl px-4 py-3 text-text-primary"
+            >
+              {Object.keys(statusColors).map((s) => (
+                <option key={s}>{s}</option>
+              ))}
+            </select>
+
+            <button className="md:col-span-3 bg-primary py-3 rounded-xl text-white font-bold">
+              Save Contract
+            </button>
+          </motion.form>
+        )}
+      </AnimatePresence>
+
+      {/* TABLE */}
+      <div className="bg-dark-800 rounded-3xl border border-dark-600/50 overflow-x-auto shadow-xl">
+        <table className="min-w-full text-sm">
+          <thead className="bg-dark-900/70">
+            <tr>
+              {["Contract ID","Client","Value","Terms","Duration","Status","Actions"].map(h => (
+                <th key={h} className="px-4 py-3 text-left text-xs uppercase text-text-muted">
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+
+          <tbody className="divide-y divide-dark-700">
+            {paginated.map((c) => (
+              <tr key={c.id} className="hover:bg-dark-700/40 transition">
+                <td className="px-4 py-3">{c.contractId}</td>
+                <td className="px-4 py-3 text-text-muted">{c.client}</td>
+                <td className="px-4 py-3 text-emerald-400 font-semibold">₹{c.value}</td>
+                <td className="px-4 py-3 text-text-muted">{c.paymentTerms}</td>
+                <td className="px-4 py-3 text-text-muted">{c.startDate} – {c.endDate}</td>
+                <td className="px-4 py-3">
+                  <span className={`px-3 py-1 rounded-full text-xs border ${statusColors[c.status]}`}>
+                    {c.status}
+                  </span>
+                </td>
+                <td className="px-4 py-3 flex gap-2">
+                  <Edit className="w-4 text-text-muted hover:text-primary cursor-pointer" />
+                  <Trash2 className="w-4 text-rose-400 cursor-pointer" />
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        {contracts.length === 0 && (
+          <div className="py-14 text-center text-text-muted">
+            No contracts found
+          </div>
+        )}
+      </div>
+
+      {/* PAGINATION */}
+      <div className="flex justify-between text-text-muted text-sm">
+        <span>
+          Showing {(page - 1) * entries + 1} to {Math.min(page * entries, contracts.length)} of {contracts.length}
+        </span>
+        <div className="flex gap-2">
+          <ChevronLeft />
+          <ChevronRight />
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 

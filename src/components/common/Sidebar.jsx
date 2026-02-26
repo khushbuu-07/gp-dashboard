@@ -66,8 +66,8 @@ const Sidebar = ({ className }) => {
           <Hexagon className="w-6 h-6 text-white" />
         </div>
         <div>
-          <span className="text-xl font-bold text-white  dark:text-black block">
-            GLOBAL<span className="text-primary">PROJECTS</span>
+          <span className="text-xl font-bold text-Black block">
+            GLOBAL{" "}<span className="text-primary">PROJECTS</span>
           </span>
           <span className="text-[10px] text-text-muted uppercase">
             Admin Panel
