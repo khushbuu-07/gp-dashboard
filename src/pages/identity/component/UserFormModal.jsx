@@ -24,7 +24,10 @@ const UserFormModal = ({ user, onClose, onSubmit, isLoading = false }) => {
     name: user?.name || "",
     email: user?.email || "",
     phone: user?.phone || "",
-    status: user?.status || "active",
+    status:
+      typeof user?.status === "boolean"
+        ? (user.status ? "active" : "inactive")
+        : (String(user?.status || "active").toLowerCase() === "inactive" ? "inactive" : "active"),
     password: "",
     role: initialRole,
   });

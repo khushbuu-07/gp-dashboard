@@ -38,7 +38,51 @@ export const userApiSlice = apiSlice.injectEndpoints({
         }
       },
     }),
+
+    updateUser: builder.mutation({
+      query: ({ id, data }) => ({
+        url: `${USERS_URL}${id}`,
+        method: "PUT",
+        body: data,
+      }),
+      async onQueryStarted(arg, { queryFulfilled }) {
+        const tid = toast.loading("Updating user...");
+        try {
+          await queryFulfilled;
+          toast.update(tid, { type: "success", message: "User updated successfully" });
+        } catch (err) {
+          toast.update(tid, {
+            type: "error",
+            message: err?.error?.data?.message || "Failed to update user",
+          });
+        }
+      },
+    }),
+
+    deleteUser: builder.mutation({
+      query: (id) => ({
+        url: `${USERS_URL}${id}`,
+        method: "DELETE",
+      }),
+      async onQueryStarted(arg, { queryFulfilled }) {
+        const tid = toast.loading("Deleting user...");
+        try {
+          await queryFulfilled;
+          toast.update(tid, { type: "success", message: "User deleted successfully" });
+        } catch (err) {
+          toast.update(tid, {
+            type: "error",
+            message: err?.error?.data?.message || "Failed to delete user",
+          });
+        }
+      },
+    }),
   }),
 });
 
-export const { useGetUsersQuery, useAddUserMutation } = userApiSlice;
+export const {
+  useGetUsersQuery,
+  useAddUserMutation,
+  useUpdateUserMutation,
+  useDeleteUserMutation,
+} = userApiSlice;

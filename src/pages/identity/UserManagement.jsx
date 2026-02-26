@@ -2,13 +2,18 @@ import React, { useMemo, useState } from "react";
 import { 
     Plus, MoreVertical, Search, Filter, Download, 
     Users, CheckCircle, Shield, UserCog,
-    Clock, ChevronLeft, ChevronRight
+    Clock, ChevronLeft, ChevronRight, Trash2
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import UserFormModal from "./component/UserFormModal";
 import ResetPasswordModal from "./component/ResetPasswordModal";
 import UserDetailsDrawer from "./component/UserDetailsDrawer";
-import { useAddUserMutation, useGetUsersQuery } from "../../redux/api/userApiSlice";
+import {
+    useAddUserMutation,
+    useDeleteUserMutation,
+    useGetUsersQuery,
+    useUpdateUserMutation,
+} from "../../redux/api/userApiSlice";
 import { toast } from "../../utils/toast";
 
 const normalizeRole = (role) => {
@@ -34,7 +39,7 @@ const toApiRole = (role) => {
     if (normalized === "admin") return "ADMIN";
     if (
         [
-            "SUPER_ADMIN",
+            "SUPER_ADMIN", 
             "ADMIN",
             "SALES_MANAGER",
             "OPERATIONS_MANAGER",
@@ -61,6 +66,12 @@ const roleLabel = (role) => {
     return role;
 };
 
+const toApiStatus = (status) => {
+    if (typeof status === "boolean") return status ? "active" : "inactive";
+    const value = String(status || "").toLowerCase();
+    return value === "inactive" ? "inactive" : "active";
+};
+
 const relativeTime = (iso) => {
     if (!iso) return "Never";
     const timestamp = new Date(iso).getTime();
@@ -78,7 +89,10 @@ const relativeTime = (iso) => {
 const UserManagement = () => {
     const { data, isLoading, isError, error, refetch } = useGetUsersQuery({ page: 1, limit: 100 });
     const [addUser, { isLoading: isCreating }] = useAddUserMutation();
+    const [updateUser, { isLoading: isUpdating }] = useUpdateUserMutation();
+    const [deleteUser, { isLoading: isDeleting }] = useDeleteUserMutation();
     const [userOverrides, setUserOverrides] = useState({});
+    const [deletedUserIds, setDeletedUserIds] = useState(new Set());
     const [selectedUser, setSelectedUser] = useState(null);
     const [showForm, setShowForm] = useState(false);
     const [showReset, setShowReset] = useState(false);
@@ -87,7 +101,9 @@ const UserManagement = () => {
     const [roleFilter, setRoleFilter] = useState("ALL");
 
     const users = useMemo(() => {
-        const source = Array.isArray(data?.users) ? data.users : [];
+        const source = Array.isArray(data?.users)
+            ? data.users.filter((u) => !u?.isDeleted && !deletedUserIds.has(u?._id))
+            : [];
         return source.map((user) => {
             const base = {
                 id: user._id,
@@ -101,7 +117,7 @@ const UserManagement = () => {
             };
             return { ...base, ...(userOverrides[user._id] || {}) };
         });
-    }, [data, userOverrides]);
+    }, [data, userOverrides, deletedUserIds]);
 
     const toggleStatus = (id) => {
         setUserOverrides((prev) => ({
@@ -118,8 +134,10 @@ const UserManagement = () => {
             await addUser({
                 name: userData.name,
                 email: userData.email,
+                phone: userData.phone,
                 password: userData.password,
                 role: toApiRole(userData.role),
+                status: toApiStatus(userData.status),
             }).unwrap();
             setShowForm(false);
             setSelectedUser(null);
@@ -129,14 +147,26 @@ const UserManagement = () => {
         }
     };
 
-    const handleUpdateUser = (userData) => {
+    const handleUpdateUser = async (userData) => {
         if (!selectedUser?.id) return;
-        setUserOverrides((prev) => ({
-            ...prev,
-            [selectedUser.id]: { ...(prev[selectedUser.id] || {}), ...userData },
-        }));
-        setShowForm(false);
-        setSelectedUser(null);
+        try {
+            await updateUser({
+                id: selectedUser.id,
+                data: {
+                    name: userData.name,
+                    email: userData.email,
+                    phone: userData.phone,
+                    status: toApiStatus(userData.status),
+                    role: toApiRole(userData.role),
+                },
+            }).unwrap();
+
+            setShowForm(false);
+            setSelectedUser(null);
+            await refetch();
+        } catch (err) {
+            toast.error(err?.data?.message || "Failed to update user");
+        }
     };
 
     const handleResetPassword = (newPassword) => {
@@ -144,6 +174,29 @@ const UserManagement = () => {
         console.log(`Password reset for ${selectedUser.name}: ${newPassword}`);
         setShowReset(false);
         setSelectedUser(null);
+    };
+
+    const handleDeleteUser = async (id) => {
+        if (!id) return;
+        const ok = window.confirm("Are you sure you want to delete this user?");
+        if (!ok) return;
+        try {
+            await deleteUser(id).unwrap();
+            setDeletedUserIds((prev) => new Set(prev).add(id));
+            setUserOverrides((prev) => {
+                if (!prev[id]) return prev;
+                const next = { ...prev };
+                delete next[id];
+                return next;
+            });
+            if (selectedUser?.id === id) {
+                setShowDrawer(false);
+                setSelectedUser(null);
+            }
+            await refetch();
+        } catch (err) {
+            toast.error(err?.data?.message || "Failed to delete user");
+        }
     };
 
     const filteredUsers = users.filter(user => {
@@ -293,7 +346,7 @@ const UserManagement = () => {
                             <thead>
                                                                <tr className="bg-slate-900/50 border-b border-slate-700 [.light_&]:bg-slate-50/50 [.light_&]:border-slate-200">
 
-                                    {['User', 'Role', 'Status', 'Last Login', 'Actions'].map((header, idx) => (
+                                    {['User', 'Mobile', 'Role', 'Status', 'Last Login', 'Actions'].map((header, idx) => (
                                                                                 <th key={idx} className="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider [.light_&]:text-slate-500">
 
                                             {header}
@@ -327,6 +380,9 @@ const UserManagement = () => {
                                                         <div className="text-xs text-slate-400 [.light_&]:text-slate-500">{user.email}</div>
                                                     </div>
                                                 </div>
+                                            </td>
+                                            <td className="px-6 py-4 text-slate-300 [.light_&]:text-slate-600">
+                                                {user.phone || "-"}
                                             </td>
 
                                             <td className="px-6 py-4 text-white [.light_&]:text-slate-900">
@@ -366,15 +422,25 @@ const UserManagement = () => {
                                             </td>
 
                                             <td className="px-6 py-4">
-                                                <button
-                                                    onClick={() => {
-                                                        setSelectedUser(user);
-                                                        setShowDrawer(true);
-                                                    }}
-                                                    className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
-                                                >
-                                                    <MoreVertical className="w-5 h-5 text-slate-400" />
-                                                </button>
+                                                <div className="flex items-center gap-2">
+                                                    <button
+                                                        onClick={() => handleDeleteUser(user.id)}
+                                                        disabled={isDeleting}
+                                                        className="p-2 hover:bg-rose-900/30 rounded-lg transition-colors disabled:opacity-50"
+                                                        title="Delete user"
+                                                    >
+                                                        <Trash2 className="w-4 h-4 text-rose-400" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => {
+                                                            setSelectedUser(user);
+                                                            setShowDrawer(true);
+                                                        }}
+                                                        className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
+                                                    >
+                                                        <MoreVertical className="w-5 h-5 text-slate-400" />
+                                                    </button>
+                                                </div>
                                             </td>
                                         </motion.tr>
                                     ))}
@@ -432,7 +498,7 @@ const UserManagement = () => {
                                 setSelectedUser(null);
                             }}
                             onSubmit={selectedUser ? handleUpdateUser : handleCreateUser}
-                            isLoading={isCreating}
+                            isLoading={isCreating || isUpdating}
                         />
                     )}
 
@@ -453,6 +519,9 @@ const UserManagement = () => {
                             onClose={() => {
                                 setShowDrawer(false);
                                 setSelectedUser(null);
+                            }}
+                            onDelete={() => {
+                                handleDeleteUser(selectedUser?.id);
                             }}
                             onEdit={() => {
                                 setShowDrawer(false);
