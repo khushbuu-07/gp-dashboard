@@ -481,24 +481,26 @@ const ManageProjects = () => {
                       <td className="px-4 py-4">
                         <div className="flex gap-2">
                           {project.hasPdf ? (
-                            <button
-                              type="button"
-                              onClick={() => project.pdfUrl && window.open(project.pdfUrl, "_blank")}
-                              title={project.pdfUrl ? "View PDF" : "PDF not available"}
-                              className="p-1 bg-rose-500/10 rounded-md"
+                            <a
+                              href={project.pdfUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              title="View PDF"
+                              className="p-1 bg-rose-500/10 rounded-md flex items-center justify-center"
                             >
                               <FileText className="w-4 h-4 text-rose-400" />
-                            </button>
+                            </a>
                           ) : null}
                           {project.hasImage ? (
-                            <button
-                              type="button"
-                              onClick={() => project.imageUrl && window.open(project.imageUrl, "_blank")}
-                              title={project.imageUrl ? "View Image" : "Image not available"}
-                              className="p-1 bg-blue-500/10 rounded-md"
+                            <a
+                              href={project.imageUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              title="View Image"
+                              className="p-1 bg-blue-500/10 rounded-md flex items-center justify-center"
                             >
                               <Image className="w-4 h-4 text-blue-400" />
-                            </button>
+                            </a>
                           ) : null}
                         </div>
                       </td>
