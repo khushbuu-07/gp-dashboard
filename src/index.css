@@ -141,19 +141,4 @@ html.light ::-webkit-scrollbar-thumb {
     z-index: 30;
     background-color: var(--sticky-bg);
   }
-
-  .overflow-x-auto table th:last-child,
-  .overflow-x-auto table td:last-child {
-    position: sticky;
-    right: 0;
-    z-index: 20;
-    background-color: var(--sticky-bg);
-    box-shadow: -1px 0 0 0 var(--sticky-border);
-    background-clip: padding-box;
-  }
-
-  .overflow-x-auto table thead th:last-child {
-    z-index: 30;
-    background-color: var(--sticky-bg);
-  }
 }

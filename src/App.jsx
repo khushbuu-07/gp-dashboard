@@ -20,7 +20,7 @@ const SalesManageProjects = lazy(() => import('./pages/Sales/ManageProjects'));
 const SalesCloseDeal = lazy(() => import('./pages/Sales/ClosedDeals'));
 const SalesDealPipeline = lazy(() => import('./pages/Sales/DealPipeline'));
 
-// Finance & Contracts 
+// Finance & Contracts
 
 const Contracts = lazy(()=> import("./pages/finance/Contracts"))
 const Invoices = lazy(()=> import("./pages/finance/Invoices"))

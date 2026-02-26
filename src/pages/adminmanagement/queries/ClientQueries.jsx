@@ -186,8 +186,7 @@ const ClientQueries = () => {
             <table className="w-full min-w-[1900px] text-sm text-left">
             <thead className="bg-dark-800/50 text-text-muted font-bold uppercase text-xs tracking-wider border-b border-dark-700/50">
               <tr>
-                <th className="sticky left-0 z-30 px-6 py-4 !bg-dark-850">S.No</th>
-                <th className="px-6 py-4">Form ID</th>
+                <th className="sticky left-0 z-30 px-6 py-4 !bg-dark-850">Form ID</th>
                 <th className="px-6 py-4">Name</th>
                 <th className="px-6 py-4">Email</th>
                 <th className="px-6 py-4">Website</th>
@@ -204,12 +203,9 @@ const ClientQueries = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-dark-700/50">
-              {filteredForms.map((form, index) => (
+              {filteredForms.map((form) => (
                 <tr key={form._id} className="group hover:bg-dark-700/30 transition-colors">
-                  <td className="sticky left-0 z-20 px-6 py-4 text-text-secondary !bg-dark-850 group-hover:!bg-dark-800">
-                    {index + 1}
-                  </td>
-                  <td className="px-6 py-4 font-mono text-primary">{form.formId}</td>
+                  <td className="sticky left-0 z-20 px-6 py-4 font-mono text-primary !bg-dark-850 group-hover:!bg-dark-800">{form.formId}</td>
                   <td className="px-6 py-4 text-text-primary">
                     {[form.firstName, form.lastName].filter(Boolean).join(" ") || "-"}
                   </td>
