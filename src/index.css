@@ -17,6 +17,8 @@
     --color-text-muted: 148 163 184;
     --app-bg: #0F1116;
     --app-text: #FFFFFF;
+    --sticky-bg: #151921; /* dark-850 */
+    --sticky-border: rgba(63, 75, 91, 0.3); /* dark-600/30 */
   }
 
   :root.light {
@@ -31,6 +33,8 @@
     --color-text-muted: 100 116 139;
     --app-bg: #F4F7FB;
     --app-text: #0F172A;
+    --sticky-bg: #FFFFFF;
+    --sticky-border: #CBD5E1; /* slate-300 */
   }
 
   body {
@@ -105,5 +109,36 @@ html.light ::-webkit-scrollbar-thumb {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+@layer components {
+  /* Global sticky first column */
+  .overflow-x-auto {
+    overflow-x: auto;
+    overflow-y: visible;
+  }
+
+  .overflow-x-auto table {
+    min-width: max-content;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  .overflow-x-auto table th:first-child,
+  .overflow-x-auto table td:first-child,
+  .overflow-x-auto table th.sticky-col,
+  .overflow-x-auto table td.sticky-col {
+    position: sticky;
+    left: 0;
+    z-index: 20;
+    background-color: var(--sticky-bg);
+    box-shadow: 1px 0 0 0 var(--sticky-border);
+    background-clip: padding-box;
+  }
+
+  .overflow-x-auto table thead th:first-child,
+  .overflow-x-auto table thead th.sticky-col {
+    z-index: 30;
+    background-color: var(--sticky-bg);
   }
 }

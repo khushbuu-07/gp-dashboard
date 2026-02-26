@@ -88,9 +88,7 @@ const ManageSecurityDeposits = () => {
     <motion.div
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
-      className="min-h-screen bg-dark-900   rounded-3xl
-        p-8
-        space-y-6text-text-primary"
+      className="min-h-screen bg-dark-900 p-6 text-text-primary"
     >
       <div className="max-w-7xl mx-auto space-y-6">
 

@@ -1,4 +1,5 @@
 import { apiSlice } from "./apiSlice";
+import { toast } from "../../utils/toast";
 
 const PROJECTS_URL = "project";
 
@@ -41,6 +42,15 @@ export const projectApiSlice = apiSlice.injectEndpoints({
         method: "POST",
         body: data,
       }),
+      async onQueryStarted(arg, { queryFulfilled }) {
+        const tid = toast.loading("Creating project...");
+        try {
+          await queryFulfilled;
+          toast.update(tid, { type: "success", message: "Project created successfully" });
+        } catch (err) {
+          toast.update(tid, { type: "error", message: err?.error?.data?.message || "Failed to create project" });
+        }
+      },
       invalidatesTags: [{ type: "Project", id: "LIST" }, { type: "Project", id: "PUBLIC_LIVE" }],
     }),
 
@@ -50,6 +60,15 @@ export const projectApiSlice = apiSlice.injectEndpoints({
         method: "PUT",
         body: data,
       }),
+      async onQueryStarted(arg, { queryFulfilled }) {
+        const tid = toast.loading("Updating project...");
+        try {
+          await queryFulfilled;
+          toast.update(tid, { type: "success", message: "Project updated successfully" });
+        } catch (err) {
+          toast.update(tid, { type: "error", message: err?.error?.data?.message || "Failed to update project" });
+        }
+      },
       invalidatesTags: (result, error, arg) => [
         { type: "Project", id: "LIST" },
         { type: "Project", id: arg._id },
@@ -62,6 +81,15 @@ export const projectApiSlice = apiSlice.injectEndpoints({
         url: `${PROJECTS_URL}/${id}`,
         method: "DELETE",
       }),
+      async onQueryStarted(arg, { queryFulfilled }) {
+        const tid = toast.loading("Deleting project...");
+        try {
+          await queryFulfilled;
+          toast.update(tid, { type: "success", message: "Project deleted successfully" });
+        } catch (err) {
+          toast.update(tid, { type: "error", message: err?.error?.data?.message || "Failed to delete project" });
+        }
+      },
       invalidatesTags: (result, error, arg) => [
         { type: "Project", id: "LIST" },
         { type: "Project", id: arg },
@@ -74,6 +102,15 @@ export const projectApiSlice = apiSlice.injectEndpoints({
         url: `${PROJECTS_URL}/${id}/applications`,
         method: "PATCH",
       }),
+      async onQueryStarted(arg, { queryFulfilled }) {
+        const tid = toast.loading("Updating applications...");
+        try {
+          await queryFulfilled;
+          toast.update(tid, { type: "success", message: "Applications updated successfully" });
+        } catch (err) {
+          toast.update(tid, { type: "error", message: err?.error?.data?.message || "Failed to update applications" });
+        }
+      },
       invalidatesTags: (result, error, arg) => [
         { type: "Project", id: "LIST" },
         { type: "Project", id: arg },

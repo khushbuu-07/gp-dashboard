@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Loader2, PhoneCall, Trash2, Pencil } from "lucide-react";
 import {
   useGetRequestCallsQuery,
@@ -6,6 +6,7 @@ import {
   useUpdateRequestCallMutation,
   useDeleteRequestCallMutation,
 } from "../../../redux/api/clientApiSlice";
+import { toast } from "../../../utils/toast";
 
 const ClientCallbackData = () => {
     const [searchInput, setSearchInput] = useState("");
@@ -22,6 +23,7 @@ const ClientCallbackData = () => {
     const [addRequestCall, { isLoading: isAdding }] = useAddRequestCallMutation();
     const [updateRequestCall, { isLoading: isUpdating }] = useUpdateRequestCallMutation();
     const [deleteRequestCall, { isLoading: isDeleting }] = useDeleteRequestCallMutation();
+    const hasShownLoadToast = useRef(false);
 
     const rows = useMemo(() => {
         const source = Array.isArray(data?.data) ? data.data : Array.isArray(data) ? data : [];
@@ -38,6 +40,19 @@ const ClientCallbackData = () => {
         }));
     }, [data]);
 
+    useEffect(() => {
+        if (!isLoading && !isError && data && !hasShownLoadToast.current) {
+            toast.info("Callback requests loaded");
+            hasShownLoadToast.current = true;
+        }
+    }, [isLoading, isError, data]);
+
+    useEffect(() => {
+        if (isError) {
+            toast.error(error?.data?.message || "Failed to load callback requests");
+        }
+    }, [isError, error]);
+
     const filteredRows = useMemo(() => {
         const q = searchApplied.trim().toLowerCase();
         if (!q) return rows;
@@ -51,8 +66,9 @@ const ClientCallbackData = () => {
         try {
             await deleteRequestCall(id).unwrap();
             refetch();
+            toast.success("Request deleted successfully");
         } catch (err) {
-            alert(err?.data?.message || "Failed to delete request");
+            toast.error(err?.data?.message || "Failed to delete request");
         }
     };
 
@@ -61,10 +77,11 @@ const ClientCallbackData = () => {
         try {
             await addRequestCall(formData).unwrap();
             refetch();
+            toast.success("Request created successfully");
             setFormData({ name: "", email: "", phone: "" });
             setIsAddOpen(false);
         } catch (err) {
-            alert(err?.data?.message || "Failed to create request");
+            toast.error(err?.data?.message || "Failed to create request");
         }
     };
 
@@ -91,38 +108,39 @@ const ClientCallbackData = () => {
                 },
             }).unwrap();
             refetch();
+            toast.success("Request updated successfully");
             setIsEditOpen(false);
             setEditingId(null);
             setEditFormData({ name: "", email: "", phone: "" });
         } catch (err) {
-            alert(err?.data?.message || "Failed to update request");
+            toast.error(err?.data?.message || "Failed to update request");
         }
     };
 
     return (
-        <div className="space-y-6 pt-6 animate-fade-in text-text-primary">
-            <div className="bg-dark-800/80 border border-dark-600 rounded-2xl p-4 flex flex-col lg:flex-row lg:items-center gap-4 justify-between">
-                <h1 className="text-4xl font-extrabold tracking-tight">Client Callback Data</h1>
+        <div className="min-h-screen bg-dark-900 p-6 text-text-muted font-sans">
+            <div className="bg-dark-850 border border-dark-700/50 rounded-2xl p-4 flex flex-col lg:flex-row lg:items-center gap-4 justify-between mb-6">
+                <h1 className="text-4xl font-bold text-text-primary tracking-tight">Client Callback Data</h1>
                 <div className="flex flex-wrap items-center gap-2">
                     <input
                         value={searchInput}
                         onChange={(e) => setSearchInput(e.target.value)}
                         placeholder="Search clients..."
-                        className="px-4 py-2.5 bg-dark-900 border border-dark-600 rounded-xl text-sm focus:outline-none focus:border-primary w-64"
+                        className="px-4 py-2.5 bg-dark-900 border border-dark-700 rounded-xl text-sm text-text-primary focus:outline-none focus:border-primary w-64"
                     />
-                    <button onClick={() => setSearchApplied(searchInput)} className="px-5 py-2.5 rounded-xl bg-dark-900 text-text-primary font-bold">Apply</button>
-                    <button onClick={() => { setSearchInput(''); setSearchApplied(''); }} className="px-5 py-2.5 rounded-xl bg-dark-700 text-text-primary font-bold">Clear</button>
-                    <button onClick={() => setIsAddOpen((p) => !p)} className="px-5 py-2.5 rounded-xl bg-primary text-white font-bold">Add Request</button>
+                    <button onClick={() => setSearchApplied(searchInput)} className="px-5 py-2.5 rounded-xl bg-dark-900 text-text-primary font-bold hover:bg-dark-800 transition-colors">Apply</button>
+                    <button onClick={() => { setSearchInput(''); setSearchApplied(''); }} className="px-5 py-2.5 rounded-xl bg-dark-700 text-text-primary font-bold hover:bg-dark-600 transition-colors">Clear</button>
+                    <button onClick={() => setIsAddOpen((p) => !p)} className="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-dark text-text-primary font-bold transition-colors">Add Request</button>
                 </div>
             </div>
 
             {isAddOpen ? (
-                <form onSubmit={handleAdd} className="bg-dark-900 border border-dark-600/60 rounded-2xl p-4 grid grid-cols-1 md:grid-cols-4 gap-3">
+                <form onSubmit={handleAdd} className="bg-dark-850 border border-dark-700/50 rounded-2xl p-4 grid grid-cols-1 md:grid-cols-4 gap-3 mb-6">
                     <input
                         value={formData.name}
                         onChange={(e) => setFormData((p) => ({ ...p, name: e.target.value }))}
                         placeholder="Name"
-                        className="px-4 py-2.5 bg-dark-900 border border-dark-600 rounded-xl text-sm focus:outline-none focus:border-primary"
+                        className="px-4 py-2.5 bg-dark-900 border border-dark-700 rounded-xl text-sm text-text-primary focus:outline-none focus:border-primary"
                         required
                     />
                     <input
@@ -130,17 +148,17 @@ const ClientCallbackData = () => {
                         value={formData.email}
                         onChange={(e) => setFormData((p) => ({ ...p, email: e.target.value }))}
                         placeholder="Email"
-                        className="px-4 py-2.5 bg-dark-900 border border-dark-600 rounded-xl text-sm focus:outline-none focus:border-primary"
+                        className="px-4 py-2.5 bg-dark-900 border border-dark-700 rounded-xl text-sm text-text-primary focus:outline-none focus:border-primary"
                         required
                     />
                     <input
                         value={formData.phone}
                         onChange={(e) => setFormData((p) => ({ ...p, phone: e.target.value }))}
                         placeholder="Phone"
-                        className="px-4 py-2.5 bg-dark-900 border border-dark-600 rounded-xl text-sm focus:outline-none focus:border-primary"
+                        className="px-4 py-2.5 bg-dark-900 border border-dark-700 rounded-xl text-sm text-text-primary focus:outline-none focus:border-primary"
                         required
                     />
-                    <button type="submit" disabled={isAdding} className="px-5 py-2.5 rounded-xl bg-primary text-white font-bold disabled:opacity-60">
+                    <button type="submit" disabled={isAdding} className="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-dark text-text-primary font-bold disabled:opacity-60 transition-colors">
                         {isAdding ? "Saving..." : "Save"}
                     </button>
                 </form>
@@ -148,7 +166,7 @@ const ClientCallbackData = () => {
 
             {isEditOpen ? (
                 <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-                    <div className="w-full max-w-lg bg-dark-900 border border-dark-600 rounded-2xl p-5">
+                    <div className="w-full max-w-lg bg-dark-850 border border-dark-700 rounded-2xl p-5 shadow-2xl">
                         <div className="flex items-center justify-between mb-4">
                             <h2 className="text-lg font-bold text-text-primary">Edit Callback Request</h2>
                             <button
@@ -156,7 +174,7 @@ const ClientCallbackData = () => {
                                     setIsEditOpen(false);
                                     setEditingId(null);
                                 }}
-                                className="px-3 py-1.5 rounded-lg bg-dark-700 text-text-primary"
+                                className="px-3 py-1.5 rounded-lg bg-dark-700 text-text-primary hover:bg-dark-600 transition-colors"
                             >
                                 Close
                             </button>
@@ -168,7 +186,7 @@ const ClientCallbackData = () => {
                                     setEditFormData((p) => ({ ...p, name: e.target.value }))
                                 }
                                 placeholder="Name"
-                                className="px-4 py-2.5 bg-dark-900 border border-dark-600 rounded-xl text-sm focus:outline-none focus:border-primary"
+                                className="px-4 py-2.5 bg-dark-900 border border-dark-700 rounded-xl text-sm text-text-primary focus:outline-none focus:border-primary"
                                 required
                             />
                             <input
@@ -178,7 +196,7 @@ const ClientCallbackData = () => {
                                     setEditFormData((p) => ({ ...p, email: e.target.value }))
                                 }
                                 placeholder="Email"
-                                className="px-4 py-2.5 bg-dark-900 border border-dark-600 rounded-xl text-sm focus:outline-none focus:border-primary"
+                                className="px-4 py-2.5 bg-dark-900 border border-dark-700 rounded-xl text-sm text-text-primary focus:outline-none focus:border-primary"
                                 required
                             />
                             <input
@@ -187,13 +205,13 @@ const ClientCallbackData = () => {
                                     setEditFormData((p) => ({ ...p, phone: e.target.value }))
                                 }
                                 placeholder="Phone"
-                                className="px-4 py-2.5 bg-dark-900 border border-dark-600 rounded-xl text-sm focus:outline-none focus:border-primary"
+                                className="px-4 py-2.5 bg-dark-900 border border-dark-700 rounded-xl text-sm text-text-primary focus:outline-none focus:border-primary"
                                 required
                             />
                             <button
                                 type="submit"
                                 disabled={isUpdating}
-                                className="px-5 py-2.5 rounded-xl bg-primary text-white font-bold disabled:opacity-60"
+                                className="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-dark text-text-primary font-bold disabled:opacity-60 transition-colors"
                             >
                                 {isUpdating ? "Updating..." : "Update"}
                             </button>
@@ -202,17 +220,17 @@ const ClientCallbackData = () => {
                 </div>
             ) : null}
 
-            <div className="bg-dark-900 border border-dark-600/60 rounded-2xl overflow-hidden">
+            <div className="bg-dark-850 border border-dark-700/50 rounded-2xl overflow-hidden shadow-xl">
                 <div className="overflow-x-auto">
                     <table className="min-w-[1200px] w-full text-sm">
-                        <thead className="bg-dark-800 border-b border-dark-600/60">
-                            <tr className="text-primary uppercase text-xs tracking-wider">
-                                {['#', 'Your Name', 'Your Email', 'Phone Number', 'Date of Calling', 'Remarks', 'Action'].map((h) => (
-                                    <th key={h} className="text-left px-4 py-3.5 font-bold whitespace-nowrap">{h}</th>
+                        <thead className="bg-dark-800/50 border-b border-dark-700/50">
+                            <tr className="text-text-muted font-bold uppercase text-xs tracking-wider">
+                                {['#', 'Your Name', 'Your Email', 'Phone Number', 'Date of Calling', 'Remarks', 'Action'].map((h, index) => (
+                                    <th key={h} className={`text-left px-4 py-3.5 font-bold whitespace-nowrap ${index === 0 ? 'sticky left-0 z-30 !bg-dark-850' : ''}`}>{h}</th>
                                 ))}
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody className="divide-y divide-dark-700/50">
                             {isLoading ? (
                                 <tr>
                                     <td colSpan={7} className="px-4 py-8 text-center text-text-muted">
@@ -235,13 +253,13 @@ const ClientCallbackData = () => {
                                     </td>
                                 </tr>
                             ) : filteredRows.map((row) => (
-                                <tr key={row.id} className="border-b border-dark-600/30 hover:bg-dark-800/50">
-                                    <td className="px-4 py-3.5 whitespace-nowrap">{row.id}</td>
-                                    <td className="px-4 py-3.5 whitespace-nowrap font-semibold">{row.name}</td>
-                                    <td className="px-4 py-3.5 whitespace-nowrap">{row.email}</td>
-                                    <td className="px-4 py-3.5 whitespace-nowrap">{row.phone}</td>
-                                    <td className="px-4 py-3.5 whitespace-nowrap">{row.dateOfCalling}</td>
-                                    <td className="px-4 py-3.5 whitespace-nowrap max-w-[380px] truncate">{row.remarks}</td>
+                                <tr key={row.id} className="group hover:bg-dark-700/30 transition-colors">
+                                    <td className="sticky left-0 z-20 px-4 py-3.5 whitespace-nowrap text-text-secondary !bg-dark-850 group-hover:!bg-dark-800">{row.id}</td>
+                                    <td className="px-4 py-3.5 whitespace-nowrap font-semibold text-text-primary">{row.name}</td>
+                                    <td className="px-4 py-3.5 whitespace-nowrap text-text-muted">{row.email}</td>
+                                    <td className="px-4 py-3.5 whitespace-nowrap text-text-muted">{row.phone}</td>
+                                    <td className="px-4 py-3.5 whitespace-nowrap text-text-muted">{row.dateOfCalling}</td>
+                                    <td className="px-4 py-3.5 whitespace-nowrap max-w-[380px] truncate text-text-muted">{row.remarks}</td>
                                     <td className="px-4 py-3.5 whitespace-nowrap">
                                         <div className="flex items-center gap-2">
                                             <a
@@ -253,14 +271,14 @@ const ClientCallbackData = () => {
                                             <button
                                                 onClick={() => handleOpenEdit(row)}
                                                 disabled={isUpdating}
-                                                className="p-2 rounded-lg bg-dark-700 border border-dark-600 text-text-muted hover:text-primary disabled:opacity-60"
+                                                className="p-2 rounded-lg bg-dark-700 text-text-muted hover:text-text-primary disabled:opacity-60 transition-colors"
                                             >
                                                 <Pencil className="w-4 h-4" />
                                             </button>
                                             <button
                                                 onClick={() => handleDelete(row._id)}
                                                 disabled={isDeleting}
-                                                className="p-2 rounded-lg bg-dark-700 border border-dark-600 text-text-muted hover:text-red-500 disabled:opacity-60"
+                                                className="p-2 rounded-lg bg-dark-700 text-text-muted hover:text-rose-400 disabled:opacity-60 transition-colors"
                                             >
                                                 <Trash2 className="w-4 h-4" />
                                             </button>

@@ -20,7 +20,7 @@ const SalesManageProjects = lazy(() => import('./pages/Sales/ManageProjects'));
 const SalesCloseDeal = lazy(() => import('./pages/Sales/ClosedDeals'));
 const SalesDealPipeline = lazy(() => import('./pages/Sales/DealPipeline'));
 
-// Finance & Contracts 
+// Finance & Contracts
 
 const Contracts = lazy(()=> import("./pages/Finance/Contracts"))
 const Invoices = lazy(()=> import("./pages/Finance/Invoices"))
@@ -49,6 +49,10 @@ const Charts = lazy(() => import('./pages/evaluation/Charts'));
 
 //  IDENTITY
 const Overview = lazy(() => import('./pages/identity/UserManagement'));
+
+// Finance
+
+
 
 const Loading = () => (
   <div className="flex h-screen w-full items-center justify-center bg-dark-900">

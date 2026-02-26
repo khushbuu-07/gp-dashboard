@@ -1,4 +1,5 @@
 import { apiSlice } from './apiSlice';
+import { toast } from '../../utils/toast';
 
 const CLIENTS_URL = 'clients';
 const FORMS_URL = 'forms';
@@ -72,6 +73,15 @@ export const clientApiSlice = apiSlice.injectEndpoints({
         method: 'POST',
         body: data,
       }),
+      async onQueryStarted(arg, { queryFulfilled }) {
+        const tid = toast.loading('Submitting form...');
+        try {
+          await queryFulfilled;
+          toast.update(tid, { type: 'success', message: 'Form submitted successfully' });
+        } catch (err) {
+          toast.update(tid, { type: 'error', message: err?.error?.data?.message || 'Failed to submit form' });
+        }
+      },
       invalidatesTags: [{ type: 'Form', id: 'LIST' }],
     }),
 
@@ -81,6 +91,15 @@ export const clientApiSlice = apiSlice.injectEndpoints({
         method: 'PATCH',
         body: { status },
       }),
+      async onQueryStarted(arg, { queryFulfilled }) {
+        const tid = toast.loading('Updating form status...');
+        try {
+          await queryFulfilled;
+          toast.update(tid, { type: 'success', message: 'Form status updated' });
+        } catch (err) {
+          toast.update(tid, { type: 'error', message: err?.error?.data?.message || 'Failed to update form status' });
+        }
+      },
       invalidatesTags: (result, error, arg) => [
         { type: 'Form', id: 'LIST' },
         { type: 'Form', id: arg.id },
@@ -93,6 +112,15 @@ export const clientApiSlice = apiSlice.injectEndpoints({
         method: 'PATCH',
         body: { userId },
       }),
+      async onQueryStarted(arg, { queryFulfilled }) {
+        const tid = toast.loading('Assigning form...');
+        try {
+          await queryFulfilled;
+          toast.update(tid, { type: 'success', message: 'Form assigned successfully' });
+        } catch (err) {
+          toast.update(tid, { type: 'error', message: err?.error?.data?.message || 'Failed to assign form' });
+        }
+      },
       invalidatesTags: (result, error, arg) => [
         { type: 'Form', id: 'LIST' },
         { type: 'Form', id: arg.id },
@@ -104,6 +132,15 @@ export const clientApiSlice = apiSlice.injectEndpoints({
         url: `${FORMS_URL}/${id}`,
         method: 'DELETE',
       }),
+      async onQueryStarted(arg, { queryFulfilled }) {
+        const tid = toast.loading('Deleting form...');
+        try {
+          await queryFulfilled;
+          toast.update(tid, { type: 'success', message: 'Form deleted successfully' });
+        } catch (err) {
+          toast.update(tid, { type: 'error', message: err?.error?.data?.message || 'Failed to delete form' });
+        }
+      },
       invalidatesTags: (result, error, arg) => [
         { type: 'Form', id: 'LIST' },
         { type: 'Form', id: arg },
@@ -125,6 +162,15 @@ export const clientApiSlice = apiSlice.injectEndpoints({
         method: 'POST',
         body: data,
       }),
+      async onQueryStarted(arg, { queryFulfilled }) {
+        const tid = toast.loading('Creating callback request...');
+        try {
+          await queryFulfilled;
+          toast.update(tid, { type: 'success', message: 'Callback request created' });
+        } catch (err) {
+          toast.update(tid, { type: 'error', message: err?.error?.data?.message || 'Failed to create callback request' });
+        }
+      },
       invalidatesTags: [{ type: 'Client', id: 'LIST' }],
     }),
 
@@ -134,6 +180,15 @@ export const clientApiSlice = apiSlice.injectEndpoints({
         method: 'PUT',
         body: data,
       }),
+      async onQueryStarted(arg, { queryFulfilled }) {
+        const tid = toast.loading('Updating callback request...');
+        try {
+          await queryFulfilled;
+          toast.update(tid, { type: 'success', message: 'Callback request updated' });
+        } catch (err) {
+          toast.update(tid, { type: 'error', message: err?.error?.data?.message || 'Failed to update callback request' });
+        }
+      },
       invalidatesTags: [{ type: 'Client', id: 'LIST' }],
     }),
 
@@ -142,6 +197,15 @@ export const clientApiSlice = apiSlice.injectEndpoints({
         url: `${REQUEST_CALL_URL}/${id}`,
         method: 'DELETE',
       }),
+      async onQueryStarted(arg, { queryFulfilled }) {
+        const tid = toast.loading('Deleting callback request...');
+        try {
+          await queryFulfilled;
+          toast.update(tid, { type: 'success', message: 'Callback request deleted' });
+        } catch (err) {
+          toast.update(tid, { type: 'error', message: err?.error?.data?.message || 'Failed to delete callback request' });
+        }
+      },
       invalidatesTags: [{ type: 'Client', id: 'LIST' }],
     }),
 
@@ -152,6 +216,15 @@ export const clientApiSlice = apiSlice.injectEndpoints({
         method: 'POST',
         body: data,
       }),
+      async onQueryStarted(arg, { queryFulfilled }) {
+        const tid = toast.loading('Creating client...');
+        try {
+          await queryFulfilled;
+          toast.update(tid, { type: 'success', message: 'Client created successfully' });
+        } catch (err) {
+          toast.update(tid, { type: 'error', message: err?.error?.data?.message || 'Failed to create client' });
+        }
+      },
       invalidatesTags: [{ type: 'Client', id: 'LIST' }],
     }),
 
@@ -162,6 +235,15 @@ export const clientApiSlice = apiSlice.injectEndpoints({
         method: 'PUT',
         body: data,
       }),
+      async onQueryStarted(arg, { queryFulfilled }) {
+        const tid = toast.loading('Updating client...');
+        try {
+          await queryFulfilled;
+          toast.update(tid, { type: 'success', message: 'Client updated successfully' });
+        } catch (err) {
+          toast.update(tid, { type: 'error', message: err?.error?.data?.message || 'Failed to update client' });
+        }
+      },
       invalidatesTags: (r, e, arg) => [
         { type: 'Client', id: arg._id },
       ],
@@ -173,6 +255,15 @@ export const clientApiSlice = apiSlice.injectEndpoints({
         url: `${CLIENTS_URL}/${clientId}`,
         method: 'DELETE',
       }),
+      async onQueryStarted(arg, { queryFulfilled }) {
+        const tid = toast.loading('Deleting client...');
+        try {
+          await queryFulfilled;
+          toast.update(tid, { type: 'success', message: 'Client deleted successfully' });
+        } catch (err) {
+          toast.update(tid, { type: 'error', message: err?.error?.data?.message || 'Failed to delete client' });
+        }
+      },
       invalidatesTags: (r, e, arg) => [
         { type: 'Client', id: arg },
       ],
