@@ -110,10 +110,10 @@ const ClientQueries = () => {
   };
 
   return (
-    <div className="space-y-6 pt-6 animate-fade-in text-text-primary">
-      <div className="flex flex-col md:flex-row justify-between items-end gap-4 border-b border-dark-600 pb-6">
+    <div className="min-h-screen bg-dark-900 p-6 text-text-muted font-sans">
+      <div className="flex flex-col md:flex-row justify-between items-end gap-4 border-b border-dark-700/50 pb-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight mb-2">Client Queries</h1>
+          <h1 className="text-3xl font-bold text-text-primary tracking-tight mb-2">Client Queries</h1>
           <p className="text-text-muted text-sm">Manage and track client support tickets.</p>
         </div>
         <div className="flex gap-2">
@@ -124,7 +124,7 @@ const ClientQueries = () => {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search by Form ID..."
-              className="pl-10 pr-4 py-2 bg-dark-800 border border-dark-600 rounded-xl text-sm focus:outline-none focus:border-primary w-64"
+              className="pl-10 pr-4 py-2 bg-dark-850 border border-dark-700/50 rounded-xl text-sm text-text-primary focus:outline-none focus:border-primary w-64"
             />
           </div>
           <div className="relative">
@@ -132,7 +132,7 @@ const ClientQueries = () => {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="pl-10 pr-4 py-2 bg-dark-800 border border-dark-600 rounded-xl text-sm focus:outline-none focus:border-primary"
+              className="pl-10 pr-4 py-2 bg-dark-850 border border-dark-700/50 rounded-xl text-sm text-text-primary focus:outline-none focus:border-primary"
             >
               <option value="ALL">All</option>
               <option value="NEW">NEW</option>
@@ -144,36 +144,36 @@ const ClientQueries = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-dark-800 p-6 rounded-2xl border border-dark-600/50 flex items-center gap-4">
+        <div className="bg-dark-850 p-6 rounded-2xl border border-dark-700/50 flex items-center gap-4">
           <div className="p-3 bg-red-500/10 rounded-xl text-red-500">
             <AlertCircle className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-2xl font-bold">{stats.pending}</p>
+            <p className="text-2xl font-bold text-text-primary">{stats.pending}</p>
             <p className="text-sm text-text-muted">New</p>
           </div>
         </div>
-        <div className="bg-dark-800 p-6 rounded-2xl border border-dark-600/50 flex items-center gap-4">
+        <div className="bg-dark-850 p-6 rounded-2xl border border-dark-700/50 flex items-center gap-4">
           <div className="p-3 bg-yellow-500/10 rounded-xl text-yellow-500">
             <Clock className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-2xl font-bold">{stats.inProgress}</p>
+            <p className="text-2xl font-bold text-text-primary">{stats.inProgress}</p>
             <p className="text-sm text-text-muted">In Progress</p>
           </div>
         </div>
-        <div className="bg-dark-800 p-6 rounded-2xl border border-dark-600/50 flex items-center gap-4">
+        <div className="bg-dark-850 p-6 rounded-2xl border border-dark-700/50 flex items-center gap-4">
           <div className="p-3 bg-green-500/10 rounded-xl text-green-500">
             <CheckCircle className="w-6 h-6" />
           </div>
           <div>
-            <p className="text-2xl font-bold">{stats.resolved}</p>
+            <p className="text-2xl font-bold text-text-primary">{stats.resolved}</p>
             <p className="text-sm text-text-muted">Resolved</p>
           </div>
         </div>
       </div>
 
-      <div className="bg-dark-900 border border-dark-600/60 rounded-2xl overflow-hidden">
+      <div className="bg-dark-850 border border-dark-700/50 rounded-2xl overflow-hidden shadow-xl">
         {isLoading ? (
           <div className="h-56 flex items-center justify-center text-text-muted">
             <Loader2 className="w-5 h-5 animate-spin mr-2" /> Loading queries...
@@ -185,9 +185,9 @@ const ClientQueries = () => {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full min-w-[1900px] text-sm text-left">
-            <thead className="bg-dark-800 text-text-muted font-medium uppercase text-xs tracking-wider">
+            <thead className="bg-dark-800/50 text-text-muted font-bold uppercase text-xs tracking-wider border-b border-dark-700/50">
               <tr>
-                <th className="px-6 py-4">Form ID</th>
+                <th className="sticky left-0 z-30 px-6 py-4 !bg-dark-850">Form ID</th>
                 <th className="px-6 py-4">Name</th>
                 <th className="px-6 py-4">Email</th>
                 <th className="px-6 py-4">Website</th>
@@ -200,14 +200,14 @@ const ClientQueries = () => {
                 <th className="px-6 py-4">Status</th>
                 <th className="px-6 py-4">Created At</th>
                 <th className="px-6 py-4">Updated At</th>
-                <th className="px-6 py-4 sticky right-0 bg-dark-800">Actions</th>
+                <th className="px-6 py-4 sticky right-0 bg-dark-850">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-dark-600/30">
+            <tbody className="divide-y divide-dark-700/50">
               {filteredForms.map((form) => (
-                <tr key={form._id} className="hover:bg-dark-800/50 transition-colors">
-                  <td className="px-6 py-4 font-mono text-primary">{form.formId}</td>
-                  <td className="px-6 py-4">
+                <tr key={form._id} className="group hover:bg-dark-700/30 transition-colors">
+                  <td className="sticky left-0 z-20 px-6 py-4 font-mono text-primary !bg-dark-850 group-hover:!bg-dark-800">{form.formId}</td>
+                  <td className="px-6 py-4 text-text-primary">
                     {[form.firstName, form.lastName].filter(Boolean).join(" ") || "-"}
                   </td>
                   <td className="px-6 py-4 text-text-muted">{form.email || "-"}</td>
@@ -234,19 +234,19 @@ const ClientQueries = () => {
                   <td className="px-6 py-4 text-text-muted">
                     {form.updatedAt ? new Date(form.updatedAt).toLocaleString() : "-"}
                   </td>
-                  <td className="px-6 py-4 sticky right-0 bg-dark-900">
+                  <td className="px-6 py-4 sticky right-0 bg-dark-850">
                     <div className="relative inline-block" data-actions-menu="true">
                       <button
                         onClick={() =>
                           setOpenActionId((prev) => (prev === form._id ? null : form._id))
                         }
-                        className="p-2 rounded-lg border border-dark-500 hover:border-primary text-text-muted hover:text-text-primary"
+                        className="p-2 rounded-lg border border-dark-700 hover:border-primary text-text-muted hover:text-text-primary"
                         aria-label="Open actions menu"
                       >
                         <MoreVertical className="w-4 h-4" />
                       </button>
                       {openActionId === form._id ? (
-                        <div className="absolute right-0 mt-2 w-44 bg-dark-800 border border-dark-600 rounded-xl shadow-xl z-20 p-2 space-y-1">
+                        <div className="absolute right-0 mt-2 w-44 bg-dark-800 border border-dark-700 rounded-xl shadow-xl z-20 p-2 space-y-1">
                           <button
                             onClick={() => {
                               handleView(form.formId);
@@ -319,12 +319,12 @@ const ClientQueries = () => {
       </div>
 
       {selectedFormId ? (
-        <div className="bg-dark-900 border border-dark-600/60 rounded-2xl p-5">
+        <div className="bg-dark-850 border border-dark-700/50 rounded-2xl p-5 shadow-xl">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-bold">Form Details</h2>
+            <h2 className="text-lg font-bold text-text-primary">Form Details</h2>
             <button
               onClick={() => setSelectedFormId(null)}
-              className="p-1.5 rounded-lg hover:bg-dark-800 text-text-muted"
+              className="p-1.5 rounded-lg hover:bg-dark-700 text-text-muted hover:text-text-primary"
             >
               <X className="w-4 h-4" />
             </button>
@@ -336,57 +336,57 @@ const ClientQueries = () => {
           ) : selectedForm ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
               <p>
-                <span className="text-text-muted">Form ID:</span> {selectedForm.formId}
+                <span className="text-text-muted">Form ID:</span> <span className="text-text-primary">{selectedForm.formId}</span>
               </p>
               <p>
                 <span className="text-text-muted">Name:</span>{" "}
-                {[selectedForm.firstName, selectedForm.lastName].filter(Boolean).join(" ") || "-"}
+                <span className="text-text-primary">{[selectedForm.firstName, selectedForm.lastName].filter(Boolean).join(" ") || "-"}</span>
               </p>
               <p>
-                <span className="text-text-muted">Email:</span> {selectedForm.email || "-"}
+                <span className="text-text-muted">Email:</span> <span className="text-text-primary">{selectedForm.email || "-"}</span>
               </p>
               <p>
-                <span className="text-text-muted">Website:</span> {selectedForm.website || "-"}
+                <span className="text-text-muted">Website:</span> <span className="text-text-primary">{selectedForm.website || "-"}</span>
               </p>
               <p>
-                <span className="text-text-muted">City:</span> {selectedForm.city || "-"}
+                <span className="text-text-muted">City:</span> <span className="text-text-primary">{selectedForm.city || "-"}</span>
               </p>
               <p>
-                <span className="text-text-muted">State:</span> {selectedForm.state || "-"}
+                <span className="text-text-muted">State:</span> <span className="text-text-primary">{selectedForm.state || "-"}</span>
               </p>
               <p>
-                <span className="text-text-muted">Country:</span> {selectedForm.country || "-"}
+                <span className="text-text-muted">Country:</span> <span className="text-text-primary">{selectedForm.country || "-"}</span>
               </p>
               <p>
                 <span className="text-text-muted">Company Type:</span>{" "}
-                {selectedForm.companyType || "-"}
+                <span className="text-text-primary">{selectedForm.companyType || "-"}</span>
               </p>
               <p>
                 <span className="text-text-muted">Interested Projects:</span>{" "}
-                {selectedForm.interestedProjects || "-"}
+                <span className="text-text-primary">{selectedForm.interestedProjects || "-"}</span>
               </p>
               <p>
                 <span className="text-text-muted">Preferred City:</span>{" "}
-                {selectedForm.preferredCity || "-"}
+                <span className="text-text-primary">{selectedForm.preferredCity || "-"}</span>
               </p>
               <p>
-                <span className="text-text-muted">Status:</span> {selectedForm.status}
+                <span className="text-text-muted">Status:</span> <span className="text-text-primary">{selectedForm.status}</span>
               </p>
               <p>
                 <span className="text-text-muted">Profile File:</span>{" "}
-                {selectedForm.profileFilePath || "N/A"}
+                <span className="text-text-primary">{selectedForm.profileFilePath || "N/A"}</span>
               </p>
               <p>
                 <span className="text-text-muted">Created:</span>{" "}
-                {selectedForm.createdAt
+                <span className="text-text-primary">{selectedForm.createdAt
                   ? new Date(selectedForm.createdAt).toLocaleString()
-                  : "-"}
+                  : "-"}</span>
               </p>
               <p>
                 <span className="text-text-muted">Updated:</span>{" "}
-                {selectedForm.updatedAt
+                <span className="text-text-primary">{selectedForm.updatedAt
                   ? new Date(selectedForm.updatedAt).toLocaleString()
-                  : "-"}
+                  : "-"}</span>
               </p>
             </div>
           ) : (
