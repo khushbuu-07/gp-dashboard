@@ -66,7 +66,7 @@ const Sidebar = ({ className }) => {
           <Hexagon className="w-6 h-6 text-white" />
         </div>
         <div>
-          <span className="text-xl font-bold text-text-primary block">
+          <span className="text-xl font-bold text-white  dark:text-black block">
             GLOBAL<span className="text-primary">PROJECTS</span>
           </span>
           <span className="text-[10px] text-text-muted uppercase">
@@ -94,7 +94,7 @@ const Sidebar = ({ className }) => {
                         "flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-semibold transition",
                         isActive
                           ? "bg-primary/10 text-primary"
-                          : "text-text-muted hover:text-text-primary hover:bg-dark-700"
+                          : "text-gray-400 hover:text-black hover:bg-dark-700"
                       )
                     }
                   >
@@ -111,7 +111,7 @@ const Sidebar = ({ className }) => {
                   <div key={item.key}>
                     <button
                       onClick={() => toggleMenu(item.label)}
-                      className="w-full flex items-center gap-4 px-4 py-3 text-sm font-semibold text-text-muted hover:text-text-primary hover:bg-dark-700 rounded-xl"
+                      className="w-full flex items-center gap-4 px-4 py-3 text-sm font-semibold text-gray-400 hover:text-black hover:bg-dark-700 rounded-xl"
                     >
                       <item.icon className="w-4 h-4" />
                       {item.label}
@@ -135,7 +135,7 @@ const Sidebar = ({ className }) => {
                                 "flex items-center gap-3 px-3 py-2 text-xs rounded-lg transition",
                                 isActive
                                   ? "text-primary bg-primary/5"
-                                  : "text-text-muted hover:text-text-primary"
+                                  : "text-gray-500 hover:text-black"
                               )
                             }
                           >
