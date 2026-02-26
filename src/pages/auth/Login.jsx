@@ -16,19 +16,28 @@ const Login = () => {
    
     
     const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError(null);
+  e.preventDefault();
+  setError(null);
 
-        try {
-            const response = await loginMutation({ email, password }).unwrap();
-            // Store the entire data object (contains both user and token)
-            dispatch(loginSuccess(response.data));
-            navigate('/');
-        } catch (err) {
-            console.error('Login error:', err);
-            setError(err?.data?.message || 'Failed to login. Please check your credentials.');
-        }
-    };
+  try {
+    const response = await loginMutation({ email, password }).unwrap();
+
+    dispatch(
+      loginSuccess({
+        user: response.message.user,
+        token: response.message.token
+      })
+    );
+
+    navigate('/');
+  } catch (err) {
+    console.error('Login error:', err);
+    setError(
+      err?.data?.message || 
+      'Failed to login. Please check your credentials.'
+    );
+  }
+};
 
     return (
         <div className="min-h-screen grid lg:grid-cols-2 bg-dark-900 overflow-hidden">

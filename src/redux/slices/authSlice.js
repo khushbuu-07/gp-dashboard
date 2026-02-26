@@ -1,45 +1,99 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice } from "@reduxjs/toolkit";
 
-const getStoredUser = () => {
-    try {
-        const userItem = localStorage.getItem('user');
-        return userItem ? JSON.parse(userItem) : null;
-    } catch (error) {
-        console.error('Error parsing user from localStorage:', error);
-        return null;
-    }
+/* =========================
+   Helpers
+========================= */
+
+const loadAuthFromStorage = () => {
+  try {
+    const data = localStorage.getItem("auth");
+    return data ? JSON.parse(data) : null;
+  } catch {
+    return null;
+  }
 };
+
+const saveAuthToStorage = (authData) => {
+  localStorage.setItem("auth", JSON.stringify(authData));
+};
+
+const clearAuthStorage = () => {
+  localStorage.removeItem("auth");
+};
+
+/* =========================
+   Initial State
+========================= */
+
+const storedAuth = loadAuthFromStorage();
 
 const initialState = {
-    user: getStoredUser(),
-    loading: false,
-    error: null,
+  user: storedAuth?.user || null,
+  token: storedAuth?.token || null,
+  isAuthenticated: !!storedAuth?.token,
+  loading: false,
+  error: null
 };
 
+/* =========================
+   Slice
+========================= */
+
 const authSlice = createSlice({
-    name: 'auth',
-    initialState,
-    reducers: {
-        loginStart: (state) => {
-            state.loading = true;
-            state.error = null;
-        },
-        loginSuccess: (state, action) => {
-            state.loading = false;
-            state.user = action.payload;
-            localStorage.setItem('user', JSON.stringify(action.payload));
-        },
-        loginFailure: (state, action) => {
-            state.loading = false;
-            state.error = action.payload;
-        },
-        logout: (state) => {
-            state.user = null;
-            localStorage.removeItem('user');
-        },
+  name: "auth",
+  initialState,
+  reducers: {
+    loginStart: (state) => {
+      state.loading = true;
+      state.error = null;
     },
+
+    loginSuccess: (state, action) => {
+      const { user, token } = action.payload;
+
+      state.loading = false;
+      state.user = user;
+      state.token = token;
+      state.isAuthenticated = true;
+      state.error = null;
+
+      saveAuthToStorage({ user, token });
+    },
+
+    loginFailure: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+      state.isAuthenticated = false;
+    },
+
+    setCredentials: (state, action) => {
+      const { user, token } = action.payload;
+
+      state.user = user;
+      state.token = token;
+      state.isAuthenticated = true;
+
+      saveAuthToStorage({ user, token });
+    },
+
+    logout: (state) => {
+      state.user = null;
+      state.token = null;
+      state.isAuthenticated = false;
+      state.loading = false;
+      state.error = null;
+
+      clearAuthStorage();
+    }
+  }
 });
 
-export const { loginStart, loginSuccess, loginFailure, logout } = authSlice.actions;
+export const {
+  loginStart,
+  loginSuccess,
+  loginFailure,
+  setCredentials,
+  logout
+} = authSlice.actions;
 
 export default authSlice.reducer;
