@@ -1,7 +1,7 @@
 import { apiSlice } from './apiSlice';
 import { toast } from '../../utils/toast';
 
-const CLIENTS_URL = 'clients';
+const CLIENTS_URL = 'clients/';
 const FORMS_URL = 'forms';
 const REQUEST_CALL_URL = 'request-call';
 
@@ -39,7 +39,13 @@ export const clientApiSlice = apiSlice.injectEndpoints({
 
     getClient: builder.query({
       query: (clientId) => `${CLIENTS_URL}/${clientId}`,
-      transformResponse: (response) => response.data,
+      transformResponse: (response) => {
+        if (response?.message?.clients) return response.message;
+        if (response?.data?.clients) return response.data;
+        if (Array.isArray(response?.clients)) return response;
+        if (Array.isArray(response?.data)) return { clients: response.data, pagination: null };
+        return { clients: [], pagination: null };
+      },
       providesTags: (result, error, arg) => [
         { type: 'Client', id: arg },
       ],
