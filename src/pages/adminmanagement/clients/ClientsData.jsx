@@ -80,7 +80,9 @@ const ClientsData = () => {
   const hasShownLoadToast = useRef(false);
 
   const rows = useMemo(() => {
-    const source = Array.isArray(data?.clients)
+    const source = Array.isArray(data?.message?.clients)
+      ? data.message.clients
+      : Array.isArray(data?.clients)
       ? data.clients
       : Array.isArray(data?.data?.clients)
         ? data.data.clients
