@@ -1,7 +1,4 @@
-<<<<<<< HEAD
 
-=======
->>>>>>> a871a2d70d234564887fd0c95fba3a3d6ad35ae4
 import React, { useEffect, useMemo, useState } from "react";
 import {
   Search,
@@ -25,10 +22,6 @@ import {
   useUpdateProjectMutation,
   useDeleteProjectMutation,
 } from "../../../redux/api/projectApiSlice";
-<<<<<<< HEAD
-
-=======
->>>>>>> a871a2d70d234564887fd0c95fba3a3d6ad35ae4
 
 const countries = [
   "Germany",
