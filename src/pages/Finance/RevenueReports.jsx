@@ -20,7 +20,7 @@ import {
 } from "recharts";
 
 /* =======================
-   SAMPLE DATA (Replace with API)
+   SAMPLE DATA
 ======================= */
 const monthlyRevenue = [
   { month: "Jan", revenue: 120000 },
@@ -52,9 +52,6 @@ const outstandingData = [
 const COLORS = ["#22c55e", "#f97316"];
 
 const RevenueReports = () => {
-  /* =======================
-     SUMMARY STATS
-  ======================= */
   const stats = useMemo(() => {
     const totalRevenue = monthlyRevenue.reduce(
       (sum, m) => sum + m.revenue,
@@ -73,13 +70,18 @@ const RevenueReports = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900/10 to-slate-900 p-6">
+    <div className="min-h-screen bg-dark-900 p-6 text-text-primary">
       <div className="max-w-7xl mx-auto space-y-8">
 
         {/* HEADER */}
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
-          Revenue Reports
-        </h1>
+        <div className="border-b border-dark-600 pb-6">
+          <h1 className="text-4xl font-extrabold tracking-tight">
+            Revenue Reports
+          </h1>
+          <p className="text-text-muted text-sm">
+            Financial performance overview & insights
+          </p>
+        </div>
 
         {/* SUMMARY CARDS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
@@ -88,46 +90,55 @@ const RevenueReports = () => {
               label: "Total Revenue",
               value: `₹${stats.totalRevenue}`,
               icon: IndianRupee,
+              color: "text-emerald-400",
             },
             {
               label: "Outstanding Amount",
               value: `₹${stats.outstanding}`,
               icon: AlertTriangle,
+              color: "text-amber-400",
             },
             {
               label: "Active Clients",
               value: stats.clients,
               icon: Users,
+              color: "text-primary",
             },
             {
               label: "Projects",
               value: stats.projects,
               icon: TrendingUp,
+              color: "text-cyan-400",
             },
           ].map((s, i) => (
             <div
               key={i}
-              className="bg-slate-800/50 border border-slate-700 rounded-2xl p-6 flex justify-between items-center"
+              className="bg-dark-800/60 border border-dark-600/50 rounded-2xl p-6 flex justify-between items-center"
             >
               <div>
-                <p className="text-slate-400 text-sm">{s.label}</p>
-                <p className="text-3xl font-bold text-white">{s.value}</p>
+                <p className="text-text-muted text-sm">{s.label}</p>
+                <p className="text-3xl font-black">{s.value}</p>
               </div>
-              <s.icon className="w-8 h-8 text-emerald-400" />
+              <s.icon className={`w-8 h-8 ${s.color}`} />
             </div>
           ))}
         </div>
 
         {/* MONTHLY REVENUE */}
-        <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-6">
-          <h2 className="text-lg font-semibold text-white mb-4">
+        <div className="bg-dark-800/60 border border-dark-600/50 rounded-2xl p-6">
+          <h2 className="text-lg font-bold mb-4">
             Monthly Revenue
           </h2>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={monthlyRevenue}>
-              <XAxis dataKey="month" stroke="#94a3b8" />
-              <YAxis stroke="#94a3b8" />
-              <Tooltip />
+              <XAxis dataKey="month" stroke="var(--color-text-muted)" />
+              <YAxis stroke="var(--color-text-muted)" />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "#020617",
+                  border: "1px solid #1e293b",
+                }}
+              />
               <Line
                 type="monotone"
                 dataKey="revenue"
@@ -138,32 +149,31 @@ const RevenueReports = () => {
           </ResponsiveContainer>
         </div>
 
-        {/* PROJECT + CLIENT REVENUE */}
+        {/* PROJECT + CLIENT */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* PROJECT WISE */}
-          <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-6">
-            <h2 className="text-lg font-semibold text-white mb-4">
+
+          <div className="bg-dark-800/60 border border-dark-600/50 rounded-2xl p-6">
+            <h2 className="text-lg font-bold mb-4">
               Project-wise Revenue
             </h2>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={projectRevenue}>
-                <XAxis dataKey="name" stroke="#94a3b8" />
-                <YAxis stroke="#94a3b8" />
+                <XAxis dataKey="name" stroke="var(--color-text-muted)" />
+                <YAxis stroke="var(--color-text-muted)" />
                 <Tooltip />
                 <Bar dataKey="value" fill="#38bdf8" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
 
-          {/* CLIENT WISE */}
-          <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-6">
-            <h2 className="text-lg font-semibold text-white mb-4">
+          <div className="bg-dark-800/60 border border-dark-600/50 rounded-2xl p-6">
+            <h2 className="text-lg font-bold mb-4">
               Client-wise Revenue
             </h2>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={clientRevenue}>
-                <XAxis dataKey="name" stroke="#94a3b8" />
-                <YAxis stroke="#94a3b8" />
+                <XAxis dataKey="name" stroke="var(--color-text-muted)" />
+                <YAxis stroke="var(--color-text-muted)" />
                 <Tooltip />
                 <Bar dataKey="value" fill="#22c55e" radius={[6, 6, 0, 0]} />
               </BarChart>
@@ -171,9 +181,9 @@ const RevenueReports = () => {
           </div>
         </div>
 
-        {/* OUTSTANDING AMOUNT */}
-        <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-6">
-          <h2 className="text-lg font-semibold text-white mb-4">
+        {/* OUTSTANDING */}
+        <div className="bg-dark-800/60 border border-dark-600/50 rounded-2xl p-6">
+          <h2 className="text-lg font-bold mb-4">
             Outstanding Amount
           </h2>
           <ResponsiveContainer width="100%" height={300}>
@@ -193,6 +203,7 @@ const RevenueReports = () => {
             </PieChart>
           </ResponsiveContainer>
         </div>
+
       </div>
     </div>
   );
