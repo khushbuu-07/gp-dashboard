@@ -100,7 +100,6 @@ const ClientQueries = () => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Delete this form?")) return;
     try {
       await deleteForm(id).unwrap();
       if (selectedFormId) setSelectedFormId(null);
@@ -110,7 +109,7 @@ const ClientQueries = () => {
   };
 
   return (
-    <div className="min-h-screen bg-dark-900 p-6 text-text-muted font-sans">
+    <div className="min-h-screen bg-dark-900 p-6 text-text-muted font-sans space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-end gap-4 border-b border-dark-700/50 pb-6">
         <div>
           <h1 className="text-3xl font-bold text-text-primary tracking-tight mb-2">Client Queries</h1>

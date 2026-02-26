@@ -16,7 +16,12 @@ export const clientApiSlice = apiSlice.injectEndpoints({
       }),
 
       
-      transformResponse: (response) => response.data,
+      transformResponse: (response) => {
+        if (response?.message?.clients) return response.message;
+        if (response?.data?.clients) return response.data;
+        if (Array.isArray(response?.clients)) return response;
+        return { clients: [], pagination: null };
+      },
 
       providesTags: (result) =>
         result?.clients

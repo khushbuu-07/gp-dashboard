@@ -18,6 +18,8 @@ const Table = ({
             {/* Header */}
             <div className="bg-dark-800 border-b border-dark-600/60 z-20 flex">
                 {columnDefs.map((col, index) => {
+                    const isFirst = index === 0;
+                    const isLast = index === columnDefs.length - 1;
                     const style = {
                         width: col.width,
                         minWidth: col.minWidth,
@@ -26,11 +28,27 @@ const Table = ({
                     if (!col.width && !col.minWidth && !col.flex) {
                         style.flex = '1 0 0px';
                     }
+
+                    if (isFirst) {
+                        style.position = 'sticky';
+                        style.left = 0;
+                        style.zIndex = 30;
+                        style.boxShadow = '1px 0 0 0 rgba(63, 75, 91, 0.3)';
+                    } else if (isLast) {
+                        style.position = 'sticky';
+                        style.right = 0;
+                        style.zIndex = 30;
+                        style.boxShadow = '-1px 0 0 0 rgba(63, 75, 91, 0.3)';
+                    }
+
                     return (
                         <div
                             key={index}
                             style={style}
-                            className="px-6 py-4 text-[11px] font-bold text-primary uppercase tracking-wider whitespace-nowrap"
+                            className={twMerge(
+                                "px-6 py-4 text-[11px] font-bold text-primary uppercase tracking-wider whitespace-nowrap",
+                                (isFirst || isLast) ? "bg-dark-800" : ""
+                            )}
                         >
                             {col.headerName}
                         </div>
@@ -47,6 +65,8 @@ const Table = ({
                             className="group hover:bg-dark-800/70 transition-all duration-200 flex border-b border-dark-600/30 last:border-0"
                         >
                             {columnDefs.map((col, colIndex) => {
+                                const isFirst = colIndex === 0;
+                                const isLast = colIndex === columnDefs.length - 1;
                                 const value = col.field ? row[col.field] : null;
                                 const params = {
                                     value,
@@ -63,11 +83,26 @@ const Table = ({
                                     style.flex = '1 0 0px';
                                 }
 
+                                if (isFirst) {
+                                    style.position = 'sticky';
+                                    style.left = 0;
+                                    style.zIndex = 20;
+                                    style.boxShadow = '1px 0 0 0 rgba(63, 75, 91, 0.3)';
+                                } else if (isLast) {
+                                    style.position = 'sticky';
+                                    style.right = 0;
+                                    style.zIndex = 20;
+                                    style.boxShadow = '-1px 0 0 0 rgba(63, 75, 91, 0.3)';
+                                }
+
                                 return (
                                     <div
                                         key={colIndex}
                                         style={style}
-                                        className="px-6 py-5 text-[13px] text-text-primary flex items-center transition-colors group-hover:text-text-primary"
+                                        className={twMerge(
+                                            "px-6 py-5 text-[13px] text-text-primary flex items-center transition-colors group-hover:text-text-primary",
+                                            (isFirst || isLast) ? "bg-dark-900 group-hover:bg-dark-800" : ""
+                                        )}
                                     >
                                         {col.cellRenderer ? col.cellRenderer(params) : (
                                             <span className="opacity-90 group-hover:opacity-100 truncate">
@@ -129,4 +164,3 @@ const Table = ({
 };
 
 export default Table;
-

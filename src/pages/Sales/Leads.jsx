@@ -10,25 +10,26 @@ import {
   ChevronRight,
   X,
   ArrowRightLeft,
-  Save,
   Globe,
   Users,
   Activity,
   Star,
   UserMinus,
+  MessageCircle,
+  Instagram,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { twMerge } from "tailwind-merge";
+import {
+  useAddLeadMutation,
+  useDeleteLeadMutation,
+  useGetLeadsQuery,
+  useUpdateLeadMutation,
+  useUpdateLeadStatusMutation,
+} from "../../redux/api/leadsApiSlice";
+import { toast } from "../../utils/toast";
 
-/* =======================
-   STATUS COLORS
-======================= */
-const statusColors = {
-  New: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-  Contacted: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-  Converted: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  Lost: "bg-rose-500/10 text-rose-400 border-rose-500/20",
-};
+const STATUS_OPTIONS = ["New", "Contacted", "Qualified", "Converted", "Lost"];
+const SOURCE_OPTIONS = ["Website", "Whatsapp", "Facebook", "Instagram", "LinkedIn", "Google Ads"];
 
 const emptyForm = {
   name: "",
@@ -40,8 +41,35 @@ const emptyForm = {
   date: "",
 };
 
+const toApiStatus = (status) => String(status || "new").toLowerCase();
+const toApiSource = (source) => String(source || "website").toLowerCase();
+
+const toUiStatus = (status) => {
+  const value = String(status || "new").toLowerCase();
+  if (value === "contacted") return "Contacted";
+  if (value === "qualified") return "Qualified";
+  if (value === "converted") return "Converted";
+  if (value === "lost") return "Lost";
+  return "New";
+};
+
+const toUiSource = (source) => {
+  const value = String(source || "").toLowerCase();
+  if (value === "whatsapp") return "Whatsapp";
+  if (value === "facebook") return "Facebook";
+  if (value === "instagram") return "Instagram";
+  if (value === "linkedin") return "LinkedIn";
+  if (value === "google ads") return "Google Ads";
+  return "Website";
+};
+
 const ManageLeads = () => {
-  const [leads, setLeads] = useState([]);
+  const { data: rawLeads = [], isLoading, isError, error, refetch } = useGetLeadsQuery();
+  const [addLead, { isLoading: isAdding }] = useAddLeadMutation();
+  const [updateLead, { isLoading: isUpdating }] = useUpdateLeadMutation();
+  const [deleteLead, { isLoading: isDeleting }] = useDeleteLeadMutation();
+  const [updateLeadStatus, { isLoading: isUpdatingStatus }] = useUpdateLeadStatusMutation();
+
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [entries, setEntries] = useState(10);
@@ -49,51 +77,128 @@ const ManageLeads = () => {
   const [page, setPage] = useState(1);
   const [selectedStatus, setSelectedStatus] = useState("ALL");
   const [form, setForm] = useState(emptyForm);
-  const [isDarkMode, setIsDarkMode] = useState(true); // Dark Mode Toggle
+  const [isDarkMode] = useState(true);
 
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const leads = useMemo(
+    () =>
+      (Array.isArray(rawLeads) ? rawLeads : []).map((lead) => ({
+        id: lead._id,
+        name: lead.name || "",
+        email: lead.email || "",
+        phone: lead.phone || "",
+        source: toUiSource(lead.source),
+        status: toUiStatus(lead.status),
+        interestedIn: lead.interestedIn || "",
+        date: lead.createdAt || lead.updatedAt || new Date().toISOString(),
+      })),
+    [rawLeads]
+  );
+
+  const filteredLeads = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    return leads.filter((lead) => {
+      const matchesSearch =
+        !query ||
+        lead.name.toLowerCase().includes(query) ||
+        lead.email.toLowerCase().includes(query) ||
+        lead.phone.toLowerCase().includes(query) ||
+        lead.interestedIn.toLowerCase().includes(query);
+
+      const matchesStatus =
+        selectedStatus === "ALL" || lead.status.toLowerCase() === selectedStatus.toLowerCase();
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [leads, search, selectedStatus]);
+
+  const paginatedLeads = useMemo(
+    () => filteredLeads.slice((page - 1) * entries, page * entries),
+    [filteredLeads, page, entries]
+  );
+
+  const handleChange = (e) => {
+    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
 
   const handleEdit = (lead) => {
-    setForm(lead);
+    setForm({
+      name: lead.name,
+      email: lead.email,
+      phone: lead.phone,
+      source: lead.source,
+      status: lead.status,
+      interestedIn: lead.interestedIn,
+      date: lead.date ? new Date(lead.date).toISOString().slice(0, 10) : "",
+    });
     setEditId(lead.id);
     setIsFormOpen(true);
   };
 
-  const handleDelete = (id) =>
-    setLeads((prev) => prev.filter((l) => l.id !== id));
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (editId) {
-      setLeads((prev) =>
-        prev.map((l) => (l.id === editId ? { ...l, ...form } : l))
-      );
-    } else {
-      setLeads([{ id: Date.now(), ...form }, ...leads]);
+  const handleDelete = async (id) => {
+    const ok = window.confirm("Are you sure you want to delete this lead?");
+    if (!ok) return;
+    try {
+      await deleteLead(id).unwrap();
+      await refetch();
+    } catch (err) {
+      toast.error(err?.data?.message || "Failed to delete lead");
     }
-    setIsFormOpen(false);
-    setEditId(null);
-    setForm(emptyForm);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const payload = {
+      name: form.name,
+      email: form.email,
+      phone: form.phone,
+      status: toApiStatus(form.status),
+      source: toApiSource(form.source),
+      interestedIn: form.interestedIn,
+    };
+
+    try {
+      if (editId) {
+        await updateLead({ id: editId, data: payload }).unwrap();
+      } else {
+        await addLead(payload).unwrap();
+      }
+      setIsFormOpen(false);
+      setEditId(null);
+      setForm(emptyForm);
+      await refetch();
+    } catch (err) {
+      toast.error(err?.data?.message || "Failed to save lead");
+    }
   };
 
   const handleCopy = (lead) => {
     navigator.clipboard.writeText(JSON.stringify(lead));
-    alert("Lead copied to clipboard!");
+    toast.success("Lead copied to clipboard");
   };
 
-  const handleConvertToClient = (lead) => {
-    setLeads((prev) =>
-      prev.map((l) =>
-        l.id === lead.id ? { ...l, status: "Converted" } : l
-      )
-    );
+  const handleConvertToClient = async (lead) => {
+    try {
+      await updateLeadStatus({ id: lead.id, status: "converted" }).unwrap();
+      await refetch();
+    } catch (err) {
+      toast.error(err?.data?.message || "Failed to convert lead");
+    }
   };
-    const getSourceIcon = (source) => {
+
+  const handleStatusChange = async (lead, value) => {
+    try {
+      await updateLeadStatus({ id: lead.id, status: toApiStatus(value) }).unwrap();
+      await refetch();
+    } catch (err) {
+      toast.error(err?.data?.message || "Failed to update status");
+    }
+  };
+
+  const getSourceIcon = (source) => {
     switch (source) {
       case "Website":
         return <Globe className="w-4 text-blue-400" />;
-      case "WhatsApp":
+      case "Whatsapp":
         return <MessageCircle className="w-4 text-green-400" />;
       case "Instagram":
         return <Instagram className="w-4 text-pink-400" />;
@@ -104,7 +209,6 @@ const ManageLeads = () => {
     }
   };
 
-
   const stats = useMemo(
     () => ({
       total: leads.length,
@@ -114,6 +218,8 @@ const ManageLeads = () => {
     }),
     [leads]
   );
+
+  const totalPages = Math.max(1, Math.ceil(filteredLeads.length / entries));
 
   return (
     <motion.div
@@ -126,7 +232,6 @@ const ManageLeads = () => {
       }`}
     >
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* HEADER */}
         <div className="flex flex-col sm:flex-row justify-between gap-4">
           <h1
             className={`text-3xl md:text-4xl font-bold ${
@@ -152,79 +257,22 @@ const ManageLeads = () => {
           </button>
         </div>
 
-        {/* Stats Section */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            {
-              label: "Total Leads",
-              value: stats.total,
-              icon: Users,
-              color: isDarkMode
-                ? "from-blue-500 to-cyan-500"
-                : "from-sky-400 to-sky-600",
-            },
-            {
-              label: "Daily Leads",
-              value: stats.active,
-              icon: Activity,
-              color: isDarkMode
-                ? "from-emerald-500 to-teal-500"
-                : "from-sky-300 to-sky-500",
-            },
-            {
-              label: "Deals",
-              value: stats.deals,
-              icon: Star,
-              color: isDarkMode
-                ? "from-amber-500 to-orange-500"
-                : "from-sky-300 to-sky-500",
-            },
-            {
-              label: "Lost",
-              value: stats.inactive,
-              icon: UserMinus,
-              color: isDarkMode
-                ? "from-rose-500 to-pink-500"
-                : "from-sky-200 to-sky-400",
-            },
+            { label: "Total Leads", value: stats.total, icon: Users, color: "from-blue-500 to-cyan-500" },
+            { label: "Daily Leads", value: stats.active, icon: Activity, color: "from-emerald-500 to-teal-500" },
+            { label: "Deals", value: stats.deals, icon: Star, color: "from-amber-500 to-orange-500" },
+            { label: "Lost", value: stats.inactive, icon: UserMinus, color: "from-rose-500 to-pink-500" },
           ].map((stat, idx) => (
-            <motion.div
-              key={idx}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.1 }}
-              className="relative group"
-            >
-              <div
-                className={`absolute inset-0 bg-gradient-to-r ${stat.color} rounded-2xl opacity-20 group-hover:opacity-30 transition-opacity blur-xl`}
-              />
-              <div
-                className={`relative rounded-2xl p-6 overflow-hidden border backdrop-blur-xl ${
-                  isDarkMode
-                    ? "bg-slate-800/50 border-slate-700"
-                    : "bg-white/70 border-sky-300"
-                }`}
-              >
+            <motion.div key={idx} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.1 }} className="relative group">
+              <div className={`absolute inset-0 bg-gradient-to-r ${stat.color} rounded-2xl opacity-20 group-hover:opacity-30 transition-opacity blur-xl`} />
+              <div className="relative rounded-2xl p-6 overflow-hidden border backdrop-blur-xl bg-slate-800/50 border-slate-700">
                 <div className="flex justify-between items-start">
                   <div>
-                    <p
-                      className={`text-sm ${
-                        isDarkMode ? "text-slate-400" : "text-sky-600"
-                      }`}
-                    >
-                      {stat.label}
-                    </p>
-                    <p
-                      className={`text-3xl font-bold mt-1 ${
-                        isDarkMode ? "text-white" : "text-sky-700"
-                      }`}
-                    >
-                      {stat.value}
-                    </p>
+                    <p className="text-sm text-slate-400">{stat.label}</p>
+                    <p className="text-3xl font-bold mt-1 text-white">{stat.value}</p>
                   </div>
-                  <div
-                    className={`p-3 bg-gradient-to-r ${stat.color} rounded-xl opacity-80`}
-                  >
+                  <div className={`p-3 bg-gradient-to-r ${stat.color} rounded-xl opacity-80`}>
                     <stat.icon className="w-5 h-5 text-white" />
                   </div>
                 </div>
@@ -233,7 +281,6 @@ const ManageLeads = () => {
           ))}
         </div>
 
-        {/* Add New Client Form */}
         <AnimatePresence>
           {isFormOpen && (
             <motion.div
@@ -243,60 +290,36 @@ const ManageLeads = () => {
               transition={{ duration: 0.3 }}
               className="overflow-hidden"
             >
-              <div
-                className={`border rounded-2xl p-6 shadow-2xl backdrop-blur-xl ${
-                  isDarkMode ? "bg-slate-800/50 border-slate-700" : "bg-white/80 border-sky-300"
-                }`}
-              >
+              <div className="border rounded-2xl p-6 shadow-2xl backdrop-blur-xl bg-slate-800/50 border-slate-700">
                 <div className="flex justify-between items-center mb-6">
-                  <h2
-                    className={`text-xl font-semibold ${
-                      isDarkMode ? "text-white" : "text-sky-700"
-                    }`}
-                  >
-                    Add New Lead
-                  </h2>
-                  <button
-                    onClick={() => setIsFormOpen(false)}
-                    className={`p-2 rounded-lg transition-colors ${
-                      isDarkMode ? "hover:bg-slate-700" : "hover:bg-sky-200"
-                    }`}
-                  >
-                    <X
-                      className={`w-5 h-5 ${
-                        isDarkMode ? "text-slate-400" : "text-sky-700"
-                      }`}
-                    />
+                  <h2 className="text-xl font-semibold text-white">{editId ? "Edit Lead" : "Add New Lead"}</h2>
+                  <button onClick={() => setIsFormOpen(false)} className="p-2 rounded-lg transition-colors hover:bg-slate-700">
+                    <X className="w-5 h-5 text-slate-400" />
                   </button>
                 </div>
 
-                <form
-                  onSubmit={handleSubmit}
-                  className="grid grid-cols-1 md:grid-cols-3 gap-4"
-                >
+                <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   {[
                     { name: "name", placeholder: "Full Name", type: "text" },
                     { name: "phone", placeholder: "Mobile Number", type: "text" },
                     { name: "email", placeholder: "Email Address", type: "email" },
                     { name: "interestedIn", placeholder: "Project Interested", type: "text" },
-                    { name: "source", placeholder: "Source", type: "select", options: ["Website","Whatsapp","Facebook","Instagram", "LinkedIn"] },
-                    { name: "status", placeholder: "Status", type: "select", options: ["New","Contacted","Converted","Lost"] },
-                    { name: "date", type: "date" }
-                  ].map((field) => (
+                    { name: "source", type: "select", options: SOURCE_OPTIONS },
+                    { name: "status", type: "select", options: STATUS_OPTIONS },
+                    { name: "date", type: "date" },
+                  ].map((field) =>
                     field.type === "select" ? (
                       <select
                         key={field.name}
                         name={field.name}
                         value={form[field.name]}
                         onChange={handleChange}
-                        className={`bg-slate-900/50 border rounded-xl px-4 py-3 outline-none transition-all ${
-                          isDarkMode
-                            ? "border-slate-700 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                            : "border-sky-300 text-sky-700 bg-white focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
-                        }`}
+                        className="bg-slate-900/50 border rounded-xl px-4 py-3 outline-none transition-all border-slate-700 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                       >
                         {field.options.map((opt) => (
-                          <option key={opt} value={opt}>{opt}</option>
+                          <option key={opt} value={opt}>
+                            {opt}
+                          </option>
                         ))}
                       </select>
                     ) : (
@@ -307,24 +330,17 @@ const ManageLeads = () => {
                         value={form[field.name]}
                         onChange={handleChange}
                         placeholder={field.placeholder}
-                        className={`rounded-xl px-4 py-3 outline-none transition-all ${
-                          isDarkMode
-                            ? "bg-slate-900/50 border border-slate-700 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                            : "bg-white border border-sky-300 text-sky-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
-                        }`}
+                        className="rounded-xl px-4 py-3 outline-none transition-all bg-slate-900/50 border border-slate-700 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                       />
                     )
-                  ))}
+                  )}
 
                   <button
                     type="submit"
-                    className={`col-span-1 md:col-span-3 py-3 rounded-xl font-bold transition-all duration-300 ${
-                      isDarkMode
-                        ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white hover:shadow-lg hover:shadow-blue-500/25"
-                        : "bg-gradient-to-r from-sky-400 to-sky-600 text-white hover:shadow-lg hover:shadow-sky-400/25"
-                    }`}
+                    disabled={isAdding || isUpdating}
+                    className="col-span-1 md:col-span-3 py-3 rounded-xl font-bold transition-all duration-300 bg-gradient-to-r from-blue-500 to-cyan-500 text-white hover:shadow-lg hover:shadow-blue-500/25 disabled:opacity-60"
                   >
-                    Add Client
+                    {isAdding || isUpdating ? "Saving..." : editId ? "Update Lead" : "Add Lead"}
                   </button>
                 </form>
               </div>
@@ -332,20 +348,16 @@ const ManageLeads = () => {
           )}
         </AnimatePresence>
 
-        {/* Controls */}
-        <div
-          className={`flex flex-col md:flex-row gap-4 justify-between rounded-xl p-4 border ${
-            isDarkMode ? "bg-slate-800/60 border-slate-700" : "bg-white/60 border-sky-300"
-          }`}
-        >
-          <div className={`flex items-center gap-2 ${isDarkMode ? "text-slate-300" : "text-sky-700"}`}>
+        <div className="flex flex-col md:flex-row gap-4 justify-between rounded-xl p-4 border bg-slate-800/60 border-slate-700">
+          <div className="flex items-center gap-2 text-slate-300">
             Show
             <select
               value={entries}
-              onChange={(e) => setEntries(+e.target.value)}
-              className={`rounded px-2 py-1 outline-none ${
-                isDarkMode ? "bg-slate-900 border border-slate-700 text-white" : "bg-white border border-sky-300 text-sky-700"
-              }`}
+              onChange={(e) => {
+                setEntries(+e.target.value);
+                setPage(1);
+              }}
+              className="rounded px-2 py-1 outline-none bg-slate-900 border border-slate-700 text-white"
             >
               <option value={5}>5</option>
               <option value={10}>10</option>
@@ -356,105 +368,93 @@ const ManageLeads = () => {
 
           <div className="flex gap-2 flex-wrap">
             <div className="relative">
-              <Search className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 ${isDarkMode ? "text-slate-500" : "text-sky-500"}`} />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 text-slate-500" />
               <input
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setPage(1);
+                }}
                 placeholder="Search..."
-                className={`pl-9 py-2 rounded-lg outline-none ${
-                  isDarkMode ? "bg-slate-900 border border-slate-700 text-white" : "bg-white border border-sky-300 text-sky-700"
-                }`}
+                className="pl-9 py-2 rounded-lg outline-none bg-slate-900 border border-slate-700 text-white"
               />
             </div>
 
             <select
               value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
-              className={`rounded-lg px-3 py-2 outline-none ${
-                isDarkMode ? "bg-slate-900 border border-slate-700 text-white" : "bg-white border border-sky-300 text-sky-700"
-              }`}
+              onChange={(e) => {
+                setSelectedStatus(e.target.value);
+                setPage(1);
+              }}
+              className="rounded-lg px-3 py-2 outline-none bg-slate-900 border border-slate-700 text-white"
             >
               <option value="ALL">All Status</option>
-              <option>New</option>
-              <option>Contacted</option>
-              <option>Converted</option>
-              <option>Lost</option>
+              {STATUS_OPTIONS.map((opt) => (
+                <option key={opt} value={opt}>
+                  {opt}
+                </option>
+              ))}
             </select>
 
-            <button
-              className={`p-2 rounded-lg border ${
-                isDarkMode ? "bg-slate-900 border-slate-700 text-white" : "bg-white border-sky-300 text-sky-700"
-              }`}
-            >
+            <button className="p-2 rounded-lg border bg-slate-900 border-slate-700 text-white">
               <Download className="w-4" />
             </button>
           </div>
         </div>
 
-        {/* Table */}
-        <div
-          className={`overflow-x-auto rounded-xl border ${
-            isDarkMode ? "bg-slate-800 border-slate-700" : "bg-white border-sky-300"
-          }`}
-        >
+        <div className="overflow-x-auto rounded-xl border bg-slate-800 border-slate-700">
           <table className="min-w-full text-sm">
-            <thead className={`${isDarkMode ? "bg-slate-900" : "bg-sky-100"}`}>
+            <thead className="bg-slate-900">
               <tr>
-                {["Name","Email","Phone","Source","Interest","Status","Date","Actions"].map((h) => (
-                  <th key={h} className={`px-4 py-3 text-left text-xs ${isDarkMode ? "text-slate-400" : "text-sky-700"}`}>
+                {["Name", "Email", "Phone", "Source", "Interest", "Status", "Date", "Actions"].map((h) => (
+                  <th key={h} className="px-4 py-3 text-left text-xs text-slate-400">
                     {h}
                   </th>
                 ))}
               </tr>
             </thead>
-            <tbody className={`divide-y ${isDarkMode ? "divide-slate-700" : "divide-sky-200"}`}>
+            <tbody className="divide-y divide-slate-700">
               <AnimatePresence>
-                {leads.slice((page - 1) * entries, page * entries).map((lead) => (
+                {paginatedLeads.map((lead) => (
                   <motion.tr
                     key={lead.id}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className={`group hover:${isDarkMode ? "bg-slate-700/30" : "bg-sky-100/50"}`}
+                    className="group transition-colors hover:bg-slate-700/30"
                   >
-                    <td className={`px-4 py-3 ${isDarkMode ? "text-white" : "text-sky-700"}`}>{lead.name}</td>
-                    <td className={`px-4 py-3 ${isDarkMode ? "text-blue-400" : "text-sky-600"}`}>{lead.email}</td>
-                    <td className={`px-4 py-3 ${isDarkMode ? "text-purple-400" : "text-sky-500"}`}>{lead.phone}</td>
+                    <td className="px-4 py-3 text-white">{lead.name}</td>
+                    <td className="px-4 py-3 text-blue-400">{lead.email}</td>
+                    <td className="px-4 py-3 text-purple-400">{lead.phone || "-"}</td>
                     <td className="px-4 py-3">{getSourceIcon(lead.source)}</td>
-                    <td className={`px-4 py-3 ${isDarkMode ? "text-slate-300" : "text-sky-600"}`}>{lead.interestedIn}</td>
-                   <td className="px-4 py-3">
-  <select
-    value={lead.status}
-    onChange={(e) =>
-      setLeads((prev) =>
-        prev.map((l) =>
-          l.id === lead.id ? { ...l, status: e.target.value } : l
-        )
-      )
-    }
-    className={`rounded-full px-2 py-1 text-xs border outline-none transition-all ${
-      isDarkMode
-        ? "bg-slate-900 border-slate-700 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-        : "bg-white border border-sky-300 text-sky-700 focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
-    }`}
-  >
-    <option value="New">New</option>
-    <option value="Contacted">Contacted</option>
-    <option value="Converted">Converted</option>
-    <option value="Lost">Lost</option>
-  </select>
-</td>
-                    <td className={`px-4 py-3 ${isDarkMode ? "text-slate-300" : "text-sky-600"}`}>{new Date(lead.date).toLocaleDateString()}</td>
+                    <td className="px-4 py-3 text-slate-300">{lead.interestedIn}</td>
+                    <td className="px-4 py-3">
+                      <select
+                        value={lead.status}
+                        onChange={(e) => handleStatusChange(lead, e.target.value)}
+                        disabled={isUpdatingStatus}
+                        className="rounded-full px-2 py-1 text-xs border outline-none transition-all bg-slate-900 border-slate-700 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:opacity-60"
+                      >
+                        {STATUS_OPTIONS.map((opt) => (
+                          <option key={opt} value={opt}>
+                            {opt}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+                    <td className="px-4 py-3 text-slate-300">
+                      {lead.date ? new Date(lead.date).toLocaleDateString() : "-"}
+                    </td>
                     <td className="px-4 py-3">
                       <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition">
                         <button onClick={() => handleEdit(lead)}>
-                          <Edit className={`w-4 ${isDarkMode ? "text-slate-300" : "text-sky-700"}`} />
+                          <Edit className="w-4 text-slate-300" />
                         </button>
-                        <button onClick={() => handleDelete(lead.id)}>
-                          <Trash2 className={`w-4 ${isDarkMode ? "text-rose-400" : "text-red-500"}`} />
+                        <button disabled={isDeleting} onClick={() => handleDelete(lead.id)}>
+                          <Trash2 className="w-4 text-rose-400" />
                         </button>
                         <button onClick={() => handleCopy(lead)}>
-                          <Copy className={`w-4 ${isDarkMode ? "text-slate-300" : "text-sky-700"}`} />
+                          <Copy className="w-4 text-slate-300" />
                         </button>
                         <button
                           onClick={() => handleConvertToClient(lead)}
@@ -470,25 +470,37 @@ const ManageLeads = () => {
               </AnimatePresence>
             </tbody>
           </table>
+
+          {isLoading && <div className="p-6 text-slate-300">Loading leads...</div>}
+          {isError && (
+            <div className="p-6 text-rose-400">{error?.data?.message || "Failed to fetch leads"}</div>
+          )}
+          {!isLoading && !isError && filteredLeads.length === 0 && (
+            <div className="p-6 text-slate-300">No leads found</div>
+          )}
         </div>
 
-        {/* Pagination */}
-        <div className={`flex justify-between items-center text-sm ${isDarkMode ? "text-slate-400" : "text-sky-700"}`}>
+        <div className="flex justify-between items-center text-sm text-slate-400">
           <span>
-            Showing {(page - 1) * entries + 1} to {Math.min(page * entries, leads.length)} of {leads.length}
+            Showing {filteredLeads.length ? (page - 1) * entries + 1 : 0} to{" "}
+            {Math.min(page * entries, filteredLeads.length)} of {filteredLeads.length}
           </span>
-          <div className="flex gap-2">
-            <button onClick={() => setPage((p) => Math.max(1, p - 1))}><ChevronLeft /></button>
-            {[...Array(Math.ceil(leads.length / entries))].map((_, i) => (
+          <div className="flex gap-2 items-center">
+            <button onClick={() => setPage((p) => Math.max(1, p - 1))}>
+              <ChevronLeft />
+            </button>
+            {[...Array(totalPages)].map((_, i) => (
               <button
                 key={i}
                 onClick={() => setPage(i + 1)}
-                className={page === i + 1 ? (isDarkMode ? "text-blue-400" : "text-sky-700") : ""}
+                className={page === i + 1 ? "text-blue-400" : ""}
               >
                 {i + 1}
               </button>
             ))}
-            <button onClick={() => setPage((p) => Math.min(Math.ceil(leads.length / entries), p + 1))}><ChevronRight /></button>
+            <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))}>
+              <ChevronRight />
+            </button>
           </div>
         </div>
       </div>
@@ -497,3 +509,4 @@ const ManageLeads = () => {
 };
 
 export default ManageLeads;
+
