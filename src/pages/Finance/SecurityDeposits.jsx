@@ -32,9 +32,6 @@ const ManageSecurityDeposits = () => {
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState(null);
 
-  /* =======================
-     HANDLERS
-  ======================= */
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -71,13 +68,14 @@ const ManageSecurityDeposits = () => {
     );
   };
 
-  /* =======================
-     STATS
-  ======================= */
   const stats = useMemo(() => {
     const total = deposits.length;
-    const refunded = deposits.filter((d) => d.refundStatus === "Refunded").length;
-    const active = deposits.filter((d) => d.refundStatus !== "Refunded").length;
+    const refunded = deposits.filter(
+      (d) => d.refundStatus === "Refunded"
+    ).length;
+    const active = deposits.filter(
+      (d) => d.refundStatus !== "Refunded"
+    ).length;
     const totalAmount = deposits.reduce(
       (sum, d) => sum + Number(d.amount || 0),
       0
@@ -90,26 +88,26 @@ const ManageSecurityDeposits = () => {
     <motion.div
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
-      className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900/10 to-slate-900 p-6"
+      className="min-h-screen bg-dark-900 p-6 text-text-primary"
     >
       <div className="max-w-7xl mx-auto space-y-6">
 
         {/* HEADER */}
-        <div className="flex justify-between items-center">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-amber-400 to-cyan-400 bg-clip-text text-transparent">
+        <div className="flex justify-between items-center border-b border-dark-600 pb-6">
+          <h1 className="text-4xl font-extrabold">
             Security Deposits
           </h1>
 
           <button
             onClick={() => setOpen(!open)}
-            className="px-6 py-3 bg-gradient-to-r from-amber-500 to-cyan-500 rounded-xl text-white font-semibold"
+            className="px-6 py-3 bg-primary hover:bg-primary-dark rounded-xl text-white font-semibold transition"
           >
             <Plus className="inline mr-2" />
             Add Deposit
           </button>
         </div>
 
-        {/* STATS SECTION */}
+        {/* STATS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           {[
             { label: "Total Deposits", value: stats.total, icon: Wallet },
@@ -123,13 +121,13 @@ const ManageSecurityDeposits = () => {
           ].map((s, i) => (
             <div
               key={i}
-              className="bg-slate-800/50 border border-slate-700 rounded-2xl p-6 flex justify-between items-center"
+              className="bg-dark-800/60 border border-dark-600/50 rounded-2xl p-6 flex justify-between items-center"
             >
               <div>
-                <p className="text-slate-400 text-sm">{s.label}</p>
-                <p className="text-3xl font-bold text-white">{s.value}</p>
+                <p className="text-text-muted text-sm">{s.label}</p>
+                <p className="text-3xl font-black">{s.value}</p>
               </div>
-              <s.icon className="w-8 h-8 text-amber-400" />
+              <s.icon className="w-8 h-8 text-primary" />
             </div>
           ))}
         </div>
@@ -142,14 +140,14 @@ const ManageSecurityDeposits = () => {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              className="bg-slate-800/50 border border-slate-700 rounded-2xl p-6 grid grid-cols-1 md:grid-cols-3 gap-4"
+              className="bg-dark-800/60 border border-dark-600/50 rounded-2xl p-6 grid grid-cols-1 md:grid-cols-3 gap-4"
             >
               <input
                 name="client"
                 value={form.client}
                 onChange={handleChange}
                 placeholder="Client Name"
-                className="bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white"
+                className="bg-dark-900 border border-dark-700 rounded-xl px-4 py-3 text-text-primary placeholder-text-muted"
               />
 
               <input
@@ -157,7 +155,7 @@ const ManageSecurityDeposits = () => {
                 value={form.amount}
                 onChange={handleChange}
                 placeholder="Deposit Amount"
-                className="bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white"
+                className="bg-dark-900 border border-dark-700 rounded-xl px-4 py-3 text-text-primary"
               />
 
               <input
@@ -165,21 +163,21 @@ const ManageSecurityDeposits = () => {
                 name="heldSince"
                 value={form.heldSince}
                 onChange={handleChange}
-                className="bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white"
+                className="bg-dark-900 border border-dark-700 rounded-xl px-4 py-3 text-text-primary"
               />
 
               <select
                 name="refundStatus"
                 value={form.refundStatus}
                 onChange={handleChange}
-                className="bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white"
+                className="bg-dark-900 border border-dark-700 rounded-xl px-4 py-3 text-text-primary"
               >
                 <option>Held</option>
                 <option>Partial</option>
                 <option>Refunded</option>
               </select>
 
-              <button className="md:col-span-3 bg-amber-500 py-3 rounded-xl text-white font-bold">
+              <button className="md:col-span-3 bg-primary py-3 rounded-xl text-white font-bold">
                 Save Deposit
               </button>
             </motion.form>
@@ -187,9 +185,9 @@ const ManageSecurityDeposits = () => {
         </AnimatePresence>
 
         {/* TABLE */}
-        <div className="overflow-x-auto bg-slate-800/60 border border-slate-700 rounded-2xl">
+        <div className="overflow-x-auto bg-dark-800/60 border border-dark-600/50 rounded-2xl">
           <table className="min-w-full text-sm">
-            <thead className="bg-slate-900/70">
+            <thead className="bg-dark-900/70">
               <tr>
                 {[
                   "Client",
@@ -200,7 +198,7 @@ const ManageSecurityDeposits = () => {
                 ].map((h) => (
                   <th
                     key={h}
-                    className="px-4 py-3 text-left text-xs uppercase text-slate-400"
+                    className="px-4 py-3 text-left text-xs uppercase text-text-muted"
                   >
                     {h}
                   </th>
@@ -208,7 +206,7 @@ const ManageSecurityDeposits = () => {
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-slate-700">
+            <tbody className="divide-y divide-dark-700">
               <AnimatePresence>
                 {deposits.map((d) => (
                   <motion.tr
@@ -216,21 +214,19 @@ const ManageSecurityDeposits = () => {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="group hover:bg-slate-700/30"
+                    className="group hover:bg-dark-700/40 transition"
                   >
-                    <td className="px-4 py-3 text-white">{d.client}</td>
+                    <td className="px-4 py-3">{d.client}</td>
                     <td className="px-4 py-3 text-emerald-400 font-semibold">
                       ₹{d.amount}
                     </td>
-                    <td className="px-4 py-3 text-slate-300">
+                    <td className="px-4 py-3 text-text-secondary">
                       {new Date(d.heldSince).toLocaleDateString()}
                     </td>
 
                     <td className="px-4 py-3">
                       <span
-                        className={`px-3 py-1 rounded-full text-xs border ${
-                          statusColors[d.refundStatus]
-                        }`}
+                        className={`px-3 py-1 rounded-full text-xs border ${statusColors[d.refundStatus]}`}
                       >
                         {d.refundStatus}
                       </span>
@@ -239,19 +235,13 @@ const ManageSecurityDeposits = () => {
                     <td className="px-4 py-3">
                       <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition">
                         {d.refundStatus !== "Refunded" && (
-                          <button
+                          <CheckCircle
                             onClick={() => markRefunded(d.id)}
-                            title="Mark as Refunded"
-                          >
-                            <CheckCircle className="w-4 text-emerald-400" />
-                          </button>
+                            className="w-4 text-emerald-400 cursor-pointer"
+                          />
                         )}
-                        <button onClick={() => handleEdit(d)}>
-                          <Edit className="w-4 text-slate-300" />
-                        </button>
-                        <button onClick={() => handleDelete(d.id)}>
-                          <Trash2 className="w-4 text-rose-400" />
-                        </button>
+                        <Edit className="w-4 text-text-muted cursor-pointer" />
+                        <Trash2 className="w-4 text-rose-400 cursor-pointer" />
                       </div>
                     </td>
                   </motion.tr>
@@ -261,7 +251,7 @@ const ManageSecurityDeposits = () => {
           </table>
 
           {deposits.length === 0 && (
-            <div className="py-12 text-center text-slate-400">
+            <div className="py-12 text-center text-text-muted">
               No security deposits found
             </div>
           )}

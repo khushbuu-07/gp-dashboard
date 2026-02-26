@@ -5,6 +5,7 @@ import InvoiceLayout from "./invoice/InvoiceLayout";
 
 export default function InvoicePage() {
 
+
   const { mode, id } = useParams();
   const navigate = useNavigate();
 
@@ -18,6 +19,7 @@ export default function InvoicePage() {
     gstEnabled: false,
     terms: ""
   });
+
 
   // 🔹 Load data for edit/view
   useEffect(() => {
@@ -49,5 +51,6 @@ export default function InvoicePage() {
       onSave={handleSave}
       mode={mode}
     />
+
   );
 }

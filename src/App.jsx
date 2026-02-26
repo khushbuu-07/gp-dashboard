@@ -20,10 +20,10 @@ const SalesManageProjects = lazy(() => import('./pages/Sales/ManageProjects'));
 const SalesCloseDeal = lazy(() => import('./pages/Sales/ClosedDeals'));
 const SalesDealPipeline = lazy(() => import('./pages/Sales/DealPipeline'));
 
-// Finance & Contracts 
+// Finance & Contracts
 
-const Contracts = lazy(()=> import("./pages/finance/Contracts"))
-const Invoices = lazy(()=> import("./pages/finance/Invoices"))
+const Contracts = lazy(()=> import("./pages/Finance/Contracts"))
+const Invoices = lazy(()=> import("./pages/Finance/Invoices"))
 const RecurringPayouts = lazy(()=> import("./pages/Finance/RecurringPayouts"))
 const RecurringReports = lazy(()=> import("./pages/Finance/RevenueReports"))
 const SecurityDeposits = lazy(()=> import("./pages/Finance/SecurityDeposits"))

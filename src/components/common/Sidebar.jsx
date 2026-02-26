@@ -66,8 +66,8 @@ const Sidebar = ({ className }) => {
           <Hexagon className="w-6 h-6 text-white" />
         </div>
         <div>
-          <span className="text-xl font-bold text-white  dark:text-black block">
-            GLOBAL<span className="text-primary">PROJECTS</span>
+          <span className="text-xl font-bold text-Black block">
+            GLOBAL{" "}<span className="text-primary">PROJECTS</span>
           </span>
           <span className="text-[10px] text-text-muted uppercase">
             Admin Panel
@@ -94,9 +94,7 @@ const Sidebar = ({ className }) => {
                         "flex items-center gap-4 px-4 py-3 rounded-xl text-sm font-semibold transition",
                         isActive
                           ? "bg-primary/10 text-primary"
-
                           : "text-gray-400 hover:text-black hover:bg-dark-700"
-
                       )
                     }
                   >
@@ -138,7 +136,6 @@ const Sidebar = ({ className }) => {
                                 isActive
                                   ? "text-primary bg-primary/5"
                                   : "text-gray-500 hover:text-black"
-
                               )
                             }
                           >
