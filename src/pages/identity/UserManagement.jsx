@@ -212,7 +212,7 @@ const UserManagement = () => {
             label: 'Total Users', 
             value: users.length, 
             icon: Users, 
-            color: 'from-blue-500 to-cyan-500' 
+            color: 'from-primary to-cyan-500' 
         },
         { 
             label: 'Active Users', 
@@ -224,7 +224,7 @@ const UserManagement = () => {
             label: 'Admins', 
             value: users.filter(u => u.role === 'ADMIN' || u.role === 'SUPER_ADMIN').length, 
             icon: Shield, 
-            color: 'from-purple-500 to-pink-500' 
+            color: 'from-primary/80 to-pink-500' 
         },
         { 
             label: 'Sales Team', 
@@ -249,7 +249,7 @@ const UserManagement = () => {
                     </div>
 
                     <div className="flex gap-3">
-                        <button className="p-3 bg-slate-800/50 border border-slate-700 rounded-xl hover:bg-slate-700/50 transition-colors [.light_&]:bg-white [.light_&]:border-slate-200 [.light_&]:hover:bg-slate-100">
+                        <button className="p-3 bg-dark-800/50 border border-dark-600/30 rounded-xl hover:bg-slate-700/50 transition-colors [.light_&]:bg-white [.light_&]:border-slate-200 [.light_&]:hover:bg-slate-100">
                             <Download className="w-5 h-5 text-slate-400 [.light_&]:text-slate-500" />
                         </button>
                         <button
@@ -257,7 +257,7 @@ const UserManagement = () => {
                                 setSelectedUser(null);
                                 setShowForm(true);
                             }}
-                            className="group relative px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl font-semibold text-white shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-all duration-300 hover:scale-105 flex items-center gap-2"
+                            className="group relative px-6 py-3 bg-gradient-to-r from-primary to-primary/80 rounded-xl font-semibold text-white shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all duration-300 hover:scale-105 flex items-center gap-2"
 
                         >
                             <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
@@ -277,7 +277,7 @@ const UserManagement = () => {
                             className="relative group"
                         >
                             <div className={`absolute inset-0 bg-gradient-to-r ${stat.color} rounded-2xl opacity-20 group-hover:opacity-30 transition-opacity blur-xl`} />
-                            <div className="relative bg-slate-800/50 backdrop-blur-xl border border-slate-700 rounded-2xl p-6 overflow-hidden [.light_&]:bg-white/70 [.light_&]:border-slate-200">
+                            <div className="relative bg-dark-800/50 backdrop-blur-xl border border-dark-600/30 rounded-2xl p-6 overflow-hidden [.light_&]:bg-white/70 [.light_&]:border-slate-200">
 
                                 <div className="flex justify-between items-start">
                                     <div>
@@ -294,7 +294,7 @@ const UserManagement = () => {
                 </div>
 
                 {/* Search and Filter Bar */}
-                <div className="bg-slate-800/50 backdrop-blur-xl border border-slate-700 rounded-2xl p-4 [.light_&]:bg-white/70 [.light_&]:border-slate-200">
+                <div className="bg-dark-800/50 backdrop-blur-xl border border-dark-600/30 rounded-2xl p-4 [.light_&]:bg-white/70 [.light_&]:border-slate-200">
                     <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
                         <div className="relative flex-1 w-full">
                                                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-slate-500 [.light_&]:text-slate-400" />
@@ -304,7 +304,7 @@ const UserManagement = () => {
                                 placeholder="Search users by name or email..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                                                className="w-full bg-slate-900 border border-slate-700 rounded-xl pl-10 pr-4 py-3 text-white placeholder-slate-500 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all [.light_&]:bg-white [.light_&]:border-slate-200 [.light_&]:text-slate-900 [.light_&]:placeholder-slate-400"
+                                                                className="w-full bg-dark-900 border border-dark-600/30 rounded-xl pl-10 pr-4 py-3 text-white placeholder-slate-500 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all [.light_&]:bg-white [.light_&]:border-slate-200 [.light_&]:text-slate-900 [.light_&]:placeholder-slate-400"
 
                             />
                         </div>
@@ -313,7 +313,7 @@ const UserManagement = () => {
                             <select
                                 value={roleFilter}
                                 onChange={(e) => setRoleFilter(e.target.value)}
-                                                               className="bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:border-blue-500 outline-none transition-all [.light_&]:bg-white [.light_&]:border-slate-200 [.light_&]:text-slate-900"
+                                                               className="bg-dark-900 border border-dark-600/30 rounded-xl px-4 py-3 text-white focus:border-primary outline-none transition-all [.light_&]:bg-white [.light_&]:border-slate-200 [.light_&]:text-slate-900"
 
                             >
                                 <option value="ALL">All Roles</option>
@@ -326,7 +326,7 @@ const UserManagement = () => {
                                 <option value="CONTENT_MANAGER">Content Manager</option>
                             </select>
                             
-                            <button className="p-3 bg-slate-900 border border-slate-700 rounded-xl hover:bg-slate-800 transition-colors [.light_&]:bg-white [.light_&]:border-slate-200 [.light_&]:hover:bg-slate-100">
+                            <button className="p-3 bg-dark-900 border border-dark-600/30 rounded-xl hover:bg-dark-800 transition-colors [.light_&]:bg-white [.light_&]:border-slate-200 [.light_&]:hover:bg-slate-100">
                                 <Filter className="w-5 h-5 text-slate-400 [.light_&]:text-slate-500" />
 
                             </button>
@@ -338,13 +338,13 @@ const UserManagement = () => {
                 <motion.div 
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-slate-800/50 backdrop-blur-xl border border-slate-700 rounded-2xl overflow-hidden shadow-2xl [.light_&]:bg-white/70 [.light_&]:border-slate-200 [.light_&]:shadow-slate-200/50"
+                    className="bg-dark-800/50 backdrop-blur-xl border border-dark-600/30 rounded-2xl overflow-hidden shadow-2xl [.light_&]:bg-white/70 [.light_&]:border-slate-200 [.light_&]:shadow-slate-200/50"
 
                 >
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm">
                             <thead>
-                                                               <tr className="bg-slate-900/50 border-b border-slate-700 [.light_&]:bg-slate-50/50 [.light_&]:border-slate-200">
+                                                               <tr className="bg-dark-900/50 border-b border-dark-600/30 [.light_&]:bg-slate-50/50 [.light_&]:border-slate-200">
 
                                     {['User', 'Mobile', 'Role', 'Status', 'Last Login', 'Actions'].map((header, idx) => (
                                                                                 <th key={idx} className="px-6 py-4 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider [.light_&]:text-slate-500">
@@ -387,8 +387,8 @@ const UserManagement = () => {
 
                                             <td className="px-6 py-4 text-white [.light_&]:text-slate-900">
                                                 <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium border
-                                                    ${user.role === 'SUPER_ADMIN' || user.role === 'ADMIN' ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' : ''}
-                                                    ${user.role === 'SALES_MANAGER' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' : ''}
+                                                    ${user.role === 'SUPER_ADMIN' || user.role === 'ADMIN' ? 'bg-primary/80/10 text-purple-400 border-primary/80/20' : ''}
+                                                    ${user.role === 'SALES_MANAGER' ? 'bg-primary/10 text-blue-400 border-primary/20' : ''}
                                                     ${user.role === 'OPERATIONS_MANAGER' ? 'bg-green-500/10 text-green-400 border-green-500/20' : ''}
                                                     ${user.role === 'FINANCE_MANAGER' ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20' : ''}
                                                     ${user.role === 'HR_MANAGER' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : ''}
@@ -469,19 +469,19 @@ const UserManagement = () => {
                     </div>
 
                     {/* Table Footer */}
-                    <div className="bg-slate-900/50 border-t border-slate-700 px-6 py-4 flex items-center justify-between">
+                    <div className="bg-dark-900/50 border-t border-dark-600/30 px-6 py-4 flex items-center justify-between">
                         <div className="text-sm text-slate-400">
                             Showing {filteredUsers.length} of {users.length} users
                         </div>
                         
                         <div className="flex gap-2">
-                            <button className="p-2 rounded-lg border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors">
+                            <button className="p-2 rounded-lg border border-dark-600/30 bg-dark-800 hover:bg-slate-700 text-slate-300 transition-colors">
                                 <ChevronLeft className="w-4 h-4" />
                             </button>
-                            <button className="px-3 py-2 rounded-lg bg-blue-500 text-white text-sm">1</button>
-                            <button className="px-3 py-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 text-sm">2</button>
-                            <button className="px-3 py-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 text-sm">3</button>
-                            <button className="p-2 rounded-lg border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors">
+                            <button className="px-3 py-2 rounded-lg bg-primary text-white text-sm">1</button>
+                            <button className="px-3 py-2 rounded-lg bg-dark-800 text-slate-300 hover:bg-slate-700 text-sm">2</button>
+                            <button className="px-3 py-2 rounded-lg bg-dark-800 text-slate-300 hover:bg-slate-700 text-sm">3</button>
+                            <button className="p-2 rounded-lg border border-dark-600/30 bg-dark-800 hover:bg-slate-700 text-slate-300 transition-colors">
                                 <ChevronRight className="w-4 h-4" />
                             </button>
                         </div>

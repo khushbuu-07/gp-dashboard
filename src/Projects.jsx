@@ -22,7 +22,7 @@ const Projects = () => {
             case 'In Progress': return 'bg-primary/10 text-primary border-primary/20';
             case 'Pending': return 'bg-gray-500/10 text-gray-500 border-gray-500/20';
             case 'Auditing': return 'bg-orange-500/10 text-orange-500 border-orange-500/20';
-            case 'Testing': return 'bg-purple-500/10 text-purple-500 border-purple-500/20';
+            case 'Testing': return 'bg-primary/80/10 text-primary/80 border-primary/80/20';
             default: return 'bg-dark-700 text-gray-400';
         }
     };

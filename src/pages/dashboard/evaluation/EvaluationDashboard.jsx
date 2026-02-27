@@ -23,7 +23,7 @@ const EvaluationDashboard = () => {
                 {[
                     { label: 'Avg Agent Score', value: '88.5%', icon: Award, color: 'text-primary', bg: 'bg-primary/10' },
                     { label: 'QA Pass Rate', value: '94.2%', icon: CheckCircle, color: 'text-green-500', bg: 'bg-green-500/10' },
-                    { label: 'Active Agents', value: '124', icon: Users, color: 'text-blue-400', bg: 'bg-blue-500/10' },
+                    { label: 'Active Agents', value: '124', icon: Users, color: 'text-blue-400', bg: 'bg-primary/10' },
                     { label: 'Critical Errors', value: '3', icon: AlertTriangle, color: 'text-red-500', bg: 'bg-red-500/10' },
                 ].map((stat, i) => (
                     <div key={i} className="bg-dark-800 p-6 rounded-2xl border border-dark-600/50">

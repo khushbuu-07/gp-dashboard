@@ -66,7 +66,7 @@ const AgentEvaluation = () => {
 
   const statusColors = {
     Excellent: 'bg-green-500/10 text-green-400 border-green-500/30',
-    Good: 'bg-blue-500/10 text-blue-400 border-blue-500/30',
+    Good: 'bg-primary/10 text-blue-400 border-primary/30',
     Average: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30',
     Poor: 'bg-red-500/10 text-red-400 border-red-500/30'
   };
@@ -224,7 +224,7 @@ const AgentEvaluation = () => {
 
           <button
             onClick={() => alert('Download All PDF')}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-sm font-semibold shadow hover:scale-105 active:scale-95 transition"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary hover:bg-blue-600 text-white text-sm font-semibold shadow hover:scale-105 active:scale-95 transition"
           >
             <FileText size={16} />
             Download All PDF
@@ -253,7 +253,7 @@ const StatCard = ({ title, value }) => (
 
 const IconBtn = ({ icon, color, onClick, tooltip }) => {
   const colors = {
-    blue: 'bg-blue-500/15 hover:bg-blue-500 text-blue-400 hover:text-white border-blue-500/30',
+    blue: 'bg-primary/15 hover:bg-primary text-blue-400 hover:text-white border-primary/30',
     gray: 'bg-gray-500/15 hover:bg-gray-500 text-gray-300 hover:text-white border-gray-500/30',
     red: 'bg-red-500/15 hover:bg-red-500 text-red-400 hover:text-white border-red-500/30'
   };

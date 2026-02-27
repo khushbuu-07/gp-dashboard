@@ -27,7 +27,7 @@ const ResetPasswordModal = ({ user, onClose, onConfirm }) => {
                 initial={{ scale: 0.9, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 exit={{ scale: 0.9, opacity: 0 }}
-                className="bg-gradient-to-br from-slate-800 to-slate-900 p-8 rounded-2xl w-full max-w-md border border-slate-700 shadow-2xl"
+                className="bg-gradient-to-br from-slate-800 to-slate-900 p-8 rounded-2xl w-full max-w-md border border-dark-600/30 shadow-2xl"
                 onClick={e => e.stopPropagation()}
             >
                 <div className="text-center mb-6">
@@ -48,7 +48,7 @@ const ResetPasswordModal = ({ user, onClose, onConfirm }) => {
                             placeholder="New Password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            className="w-full bg-slate-900/50 border border-slate-700 rounded-xl pl-10 pr-12 py-3 text-white placeholder-slate-500 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-all"
+                            className="w-full bg-dark-900/50 border border-dark-600/30 rounded-xl pl-10 pr-12 py-3 text-white placeholder-slate-500 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-all"
                             required
                         />
                         <button
@@ -67,7 +67,7 @@ const ResetPasswordModal = ({ user, onClose, onConfirm }) => {
                             placeholder="Confirm New Password"
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
-                            className="w-full bg-slate-900/50 border border-slate-700 rounded-xl pl-10 pr-12 py-3 text-white placeholder-slate-500 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-all"
+                            className="w-full bg-dark-900/50 border border-dark-600/30 rounded-xl pl-10 pr-12 py-3 text-white placeholder-slate-500 focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition-all"
                             required
                         />
                         <button

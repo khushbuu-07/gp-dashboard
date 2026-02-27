@@ -116,8 +116,8 @@ const Table = ({
                     ))
                 ) : (
                     <div className="w-full py-24 text-center flex flex-col items-center justify-center gap-3">
-                        <div className="w-12 h-12 rounded-full bg-blue-500/5 flex items-center justify-center border border-blue-500/10">
-                            <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                        <div className="w-12 h-12 rounded-full bg-primary/5 flex items-center justify-center border border-primary/10">
+                            <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
                         </div>
                         <span className="text-primary/50 font-bold text-[10px] uppercase tracking-widest">
                             No data synchronized

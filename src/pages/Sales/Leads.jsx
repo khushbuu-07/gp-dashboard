@@ -246,7 +246,7 @@ const ManageLeads = () => {
             onClick={() => setIsFormOpen(!isFormOpen)}
             className={`group relative px-6 py-3 rounded-xl font-semibold shadow-lg transition-all duration-300 hover:scale-105 ${
               isDarkMode
-                ? "bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-blue-500/25 hover:shadow-blue-500/40"
+                ? "bg-gradient-to-r from-primary to-cyan-500 text-white shadow-primary/25 hover:shadow-primary/40"
                 : "bg-gradient-to-r from-sky-400 to-sky-600 text-white shadow-sky-400/25 hover:shadow-sky-400/40"
             }`}
           >
@@ -259,14 +259,14 @@ const ManageLeads = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: "Total Leads", value: stats.total, icon: Users, color: "from-blue-500 to-cyan-500" },
+            { label: "Total Leads", value: stats.total, icon: Users, color: "from-primary to-cyan-500" },
             { label: "Daily Leads", value: stats.active, icon: Activity, color: "from-emerald-500 to-teal-500" },
             { label: "Deals", value: stats.deals, icon: Star, color: "from-amber-500 to-orange-500" },
             { label: "Lost", value: stats.inactive, icon: UserMinus, color: "from-rose-500 to-pink-500" },
           ].map((stat, idx) => (
             <motion.div key={idx} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.1 }} className="relative group">
               <div className={`absolute inset-0 bg-gradient-to-r ${stat.color} rounded-2xl opacity-20 group-hover:opacity-30 transition-opacity blur-xl`} />
-              <div className="relative rounded-2xl p-6 overflow-hidden border backdrop-blur-xl bg-slate-800/50 border-slate-700">
+              <div className="relative rounded-2xl p-6 overflow-hidden border backdrop-blur-xl bg-dark-800/50 border-dark-600/30">
                 <div className="flex justify-between items-start">
                   <div>
                     <p className="text-sm text-slate-400">{stat.label}</p>
@@ -290,7 +290,7 @@ const ManageLeads = () => {
               transition={{ duration: 0.3 }}
               className="overflow-hidden"
             >
-              <div className="border rounded-2xl p-6 shadow-2xl backdrop-blur-xl bg-slate-800/50 border-slate-700">
+              <div className="border rounded-2xl p-6 shadow-2xl backdrop-blur-xl bg-dark-800/50 border-dark-600/30">
                 <div className="flex justify-between items-center mb-6">
                   <h2 className="text-xl font-semibold text-white">{editId ? "Edit Lead" : "Add New Lead"}</h2>
                   <button onClick={() => setIsFormOpen(false)} className="p-2 rounded-lg transition-colors hover:bg-slate-700">
@@ -314,7 +314,7 @@ const ManageLeads = () => {
                         name={field.name}
                         value={form[field.name]}
                         onChange={handleChange}
-                        className="bg-slate-900/50 border rounded-xl px-4 py-3 outline-none transition-all border-slate-700 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                        className="bg-dark-900/50 border rounded-xl px-4 py-3 outline-none transition-all border-dark-600/30 text-white focus:border-primary focus:ring-1 focus:ring-primary"
                       >
                         {field.options.map((opt) => (
                           <option key={opt} value={opt}>
@@ -330,7 +330,7 @@ const ManageLeads = () => {
                         value={form[field.name]}
                         onChange={handleChange}
                         placeholder={field.placeholder}
-                        className="rounded-xl px-4 py-3 outline-none transition-all bg-slate-900/50 border border-slate-700 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                        className="rounded-xl px-4 py-3 outline-none transition-all bg-dark-900/50 border border-dark-600/30 text-white focus:border-primary focus:ring-1 focus:ring-primary"
                       />
                     )
                   )}
@@ -338,7 +338,7 @@ const ManageLeads = () => {
                   <button
                     type="submit"
                     disabled={isAdding || isUpdating}
-                    className="col-span-1 md:col-span-3 py-3 rounded-xl font-bold transition-all duration-300 bg-gradient-to-r from-blue-500 to-cyan-500 text-white hover:shadow-lg hover:shadow-blue-500/25 disabled:opacity-60"
+                    className="col-span-1 md:col-span-3 py-3 rounded-xl font-bold transition-all duration-300 bg-gradient-to-r from-primary to-cyan-500 text-white hover:shadow-lg hover:shadow-primary/25 disabled:opacity-60"
                   >
                     {isAdding || isUpdating ? "Saving..." : editId ? "Update Lead" : "Add Lead"}
                   </button>
@@ -348,7 +348,7 @@ const ManageLeads = () => {
           )}
         </AnimatePresence>
 
-        <div className="flex flex-col md:flex-row gap-4 justify-between rounded-xl p-4 border bg-slate-800/60 border-slate-700">
+        <div className="flex flex-col md:flex-row gap-4 justify-between rounded-xl p-4 border bg-dark-800/60 border-dark-600/30">
           <div className="flex items-center gap-2 text-slate-300">
             Show
             <select
@@ -357,7 +357,7 @@ const ManageLeads = () => {
                 setEntries(+e.target.value);
                 setPage(1);
               }}
-              className="rounded px-2 py-1 outline-none bg-slate-900 border border-slate-700 text-white"
+              className="rounded px-2 py-1 outline-none bg-dark-900 border border-dark-600/30 text-white"
             >
               <option value={5}>5</option>
               <option value={10}>10</option>
@@ -376,7 +376,7 @@ const ManageLeads = () => {
                   setPage(1);
                 }}
                 placeholder="Search..."
-                className="pl-9 py-2 rounded-lg outline-none bg-slate-900 border border-slate-700 text-white"
+                className="pl-9 py-2 rounded-lg outline-none bg-dark-900 border border-dark-600/30 text-white"
               />
             </div>
 
@@ -386,7 +386,7 @@ const ManageLeads = () => {
                 setSelectedStatus(e.target.value);
                 setPage(1);
               }}
-              className="rounded-lg px-3 py-2 outline-none bg-slate-900 border border-slate-700 text-white"
+              className="rounded-lg px-3 py-2 outline-none bg-dark-900 border border-dark-600/30 text-white"
             >
               <option value="ALL">All Status</option>
               {STATUS_OPTIONS.map((opt) => (
@@ -396,15 +396,15 @@ const ManageLeads = () => {
               ))}
             </select>
 
-            <button className="p-2 rounded-lg border bg-slate-900 border-slate-700 text-white">
+            <button className="p-2 rounded-lg border bg-dark-900 border-dark-600/30 text-white">
               <Download className="w-4" />
             </button>
           </div>
         </div>
 
-        <div className="overflow-x-auto rounded-xl border bg-slate-800 border-slate-700">
-          <table className="w-full table-auto text-sm">
-            <thead className="bg-slate-900">
+        <div className="overflow-x-auto rounded-xl border bg-dark-800 border-dark-600/30">
+          <table className="min-w-full text-sm">
+            <thead className="bg-dark-900">
               <tr>
                 {["Name", "Email", "Phone", "Source", "Interest", "Status", "Date", "Actions"].map((h) => (
                   <th key={h} className="px-4 py-3 text-left text-xs text-slate-400">
@@ -433,7 +433,7 @@ const ManageLeads = () => {
                         value={lead.status}
                         onChange={(e) => handleStatusChange(lead, e.target.value)}
                         disabled={isUpdatingStatus}
-                        className="rounded-full px-2 py-1 text-xs border outline-none transition-all bg-slate-900 border-slate-700 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 disabled:opacity-60"
+                        className="rounded-full px-2 py-1 text-xs border outline-none transition-all bg-dark-900 border-dark-600/30 text-white focus:border-primary focus:ring-1 focus:ring-primary disabled:opacity-60"
                       >
                         {STATUS_OPTIONS.map((opt) => (
                           <option key={opt} value={opt}>

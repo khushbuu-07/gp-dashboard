@@ -53,7 +53,7 @@ const UserFormModal = ({ user, onClose, onSubmit, isLoading = false }) => {
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         exit={{ y: 10, opacity: 0 }}
-        className="w-full max-w-xl max-h-[92vh] overflow-y-auto rounded-2xl border border-slate-700 bg-slate-900 p-4 sm:p-6 [.light_&]:border-slate-200 [.light_&]:bg-white"
+        className="w-full max-w-xl max-h-[92vh] overflow-y-auto rounded-2xl border border-dark-600/30 bg-dark-900 p-4 sm:p-6 [.light_&]:border-slate-200 [.light_&]:bg-white"
       >
         <div className="mb-4 sm:mb-6 flex items-center justify-between gap-3">
           <h2 className="text-lg sm:text-xl font-semibold text-white [.light_&]:text-slate-900">
@@ -62,7 +62,7 @@ const UserFormModal = ({ user, onClose, onSubmit, isLoading = false }) => {
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg p-2 text-slate-400 hover:bg-slate-800 [.light_&]:hover:bg-slate-100"
+            className="rounded-lg p-2 text-slate-400 hover:bg-dark-800 [.light_&]:hover:bg-slate-100"
           >
             <X className="h-5 w-5" />
           </button>
@@ -76,7 +76,7 @@ const UserFormModal = ({ user, onClose, onSubmit, isLoading = false }) => {
               value={formData.name}
               onChange={handleChange}
               required
-              className="w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3 text-white outline-none focus:border-blue-500 [.light_&]:border-slate-200 [.light_&]:bg-white [.light_&]:text-slate-900"
+              className="w-full rounded-xl border border-dark-600/30 bg-dark-800 px-4 py-3 text-white outline-none focus:border-primary [.light_&]:border-slate-200 [.light_&]:bg-white [.light_&]:text-slate-900"
             />
           </div>
 
@@ -88,7 +88,7 @@ const UserFormModal = ({ user, onClose, onSubmit, isLoading = false }) => {
               value={formData.email}
               onChange={handleChange}
               required
-              className="w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3 text-white outline-none focus:border-blue-500 [.light_&]:border-slate-200 [.light_&]:bg-white [.light_&]:text-slate-900"
+              className="w-full rounded-xl border border-dark-600/30 bg-dark-800 px-4 py-3 text-white outline-none focus:border-primary [.light_&]:border-slate-200 [.light_&]:bg-white [.light_&]:text-slate-900"
             />
           </div>
 
@@ -99,7 +99,7 @@ const UserFormModal = ({ user, onClose, onSubmit, isLoading = false }) => {
               name="phone"
               value={formData.phone}
               onChange={handleChange}
-              className="w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3 text-white outline-none focus:border-blue-500 [.light_&]:border-slate-200 [.light_&]:bg-white [.light_&]:text-slate-900"
+              className="w-full rounded-xl border border-dark-600/30 bg-dark-800 px-4 py-3 text-white outline-none focus:border-primary [.light_&]:border-slate-200 [.light_&]:bg-white [.light_&]:text-slate-900"
             />
           </div>
 
@@ -113,7 +113,7 @@ const UserFormModal = ({ user, onClose, onSubmit, isLoading = false }) => {
                 onChange={handleChange}
                 required
                 minLength={8}
-                className="w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3 text-white outline-none focus:border-blue-500 [.light_&]:border-slate-200 [.light_&]:bg-white [.light_&]:text-slate-900"
+                className="w-full rounded-xl border border-dark-600/30 bg-dark-800 px-4 py-3 text-white outline-none focus:border-primary [.light_&]:border-slate-200 [.light_&]:bg-white [.light_&]:text-slate-900"
               />
             </div>
           )}
@@ -124,7 +124,7 @@ const UserFormModal = ({ user, onClose, onSubmit, isLoading = false }) => {
               name="role"
               value={formData.role}
               onChange={handleChange}
-              className="w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3 text-white outline-none focus:border-blue-500 [.light_&]:border-slate-200 [.light_&]:bg-white [.light_&]:text-slate-900"
+              className="w-full rounded-xl border border-dark-600/30 bg-dark-800 px-4 py-3 text-white outline-none focus:border-primary [.light_&]:border-slate-200 [.light_&]:bg-white [.light_&]:text-slate-900"
             >
               {ROLE_OPTIONS.map((role) => (
                 <option key={role} value={role}>
@@ -140,7 +140,7 @@ const UserFormModal = ({ user, onClose, onSubmit, isLoading = false }) => {
               name="status"
               value={formData.status}
               onChange={handleChange}
-              className="w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3 text-white outline-none focus:border-blue-500 [.light_&]:border-slate-200 [.light_&]:bg-white [.light_&]:text-slate-900"
+              className="w-full rounded-xl border border-dark-600/30 bg-dark-800 px-4 py-3 text-white outline-none focus:border-primary [.light_&]:border-slate-200 [.light_&]:bg-white [.light_&]:text-slate-900"
             >
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
@@ -151,14 +151,14 @@ const UserFormModal = ({ user, onClose, onSubmit, isLoading = false }) => {
             <button
               type="button"
               onClick={onClose}
-              className="w-full sm:w-auto rounded-xl border border-slate-700 px-4 py-2 text-slate-200 hover:bg-slate-800 [.light_&]:border-slate-300 [.light_&]:text-slate-700 [.light_&]:hover:bg-slate-100"
+              className="w-full sm:w-auto rounded-xl border border-dark-600/30 px-4 py-2 text-slate-200 hover:bg-dark-800 [.light_&]:border-slate-300 [.light_&]:text-slate-700 [.light_&]:hover:bg-slate-100"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full sm:w-auto rounded-xl bg-blue-600 px-4 py-2 font-medium text-white hover:bg-blue-500 disabled:opacity-60"
+              className="w-full sm:w-auto rounded-xl bg-blue-600 px-4 py-2 font-medium text-white hover:bg-primary disabled:opacity-60"
             >
               {isLoading ? "Saving..." : isEdit ? "Update User" : "Create User"}
             </button>
