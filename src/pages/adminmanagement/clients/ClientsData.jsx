@@ -254,7 +254,7 @@ const ClientsData = () => {
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {[
-            { label: "Total Clients", value: stats.total, color: "from-blue-500 to-cyan-500", icon: Users },
+            { label: "Total Clients", value: stats.total, color: "from-primary to-cyan-500", icon: Users },
             { label: "Active", value: stats.active, color: "from-emerald-500 to-teal-500", icon: Activity },
             { label: "Prospects", value: stats.prospects, color: "from-amber-500 to-orange-500", icon: Star },
             { label: "Inactive", value: stats.inactive, color: "from-rose-500 to-pink-500", icon: UserMinus },

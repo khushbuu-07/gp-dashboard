@@ -21,16 +21,16 @@ const IdentityDashboard = () => {
                     <p className="text-3xl font-black text-white">24</p>
                     <p className="text-xs text-text-muted mt-2">Across 8 countries</p>
                 </div>
-                <div className="bg-dark-800 p-6 rounded-2xl border border-dark-600/50 hover:border-purple-500/50 transition-all group">
-                    <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <div className="bg-dark-800 p-6 rounded-2xl border border-dark-600/50 hover:border-primary/80/50 transition-all group">
+                    <div className="w-12 h-12 bg-primary/80/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                         <Lock className="w-6 h-6 text-purple-400" />
                     </div>
                     <h3 className="text-lg font-bold mb-1">Security Alerts</h3>
                     <p className="text-3xl font-black text-white">0</p>
                     <p className="text-xs text-text-muted mt-2">System secure</p>
                 </div>
-                <div className="bg-dark-800 p-6 rounded-2xl border border-dark-600/50 hover:border-blue-500/50 transition-all group">
-                    <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                <div className="bg-dark-800 p-6 rounded-2xl border border-dark-600/50 hover:border-primary/50 transition-all group">
+                    <div className="w-12 h-12 bg-primary/20 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                         <Server className="w-6 h-6 text-blue-400" />
                     </div>
                     <h3 className="text-lg font-bold mb-1">Data Nodes</h3>

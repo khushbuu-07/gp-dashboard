@@ -501,7 +501,7 @@ const ManageProjects = () => {
                               target="_blank"
                               rel="noopener noreferrer"
                               title="View Image"
-                              className="p-1 bg-blue-500/10 rounded-md flex items-center justify-center"
+                              className="p-1 bg-primary/10 rounded-md flex items-center justify-center"
                             >
                               <Image className="w-4 h-4 text-blue-400" />
                             </a>

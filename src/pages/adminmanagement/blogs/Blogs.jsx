@@ -1,177 +1,356 @@
-import React from 'react';
-import {
-    Calendar, User, Clock, ArrowRight, Share2,
-    Heart, MessageCircle, Tag, TrendingUp
-} from 'lucide-react';
+import React, { useState, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { 
+    TrendingUp, PlusCircle, Search, 
+    Calendar, User, Tag, Eye, 
+    ChevronLeft, ChevronRight, X
+} from "lucide-react";
+import BlogEditor from "./BlogEditor";
+import BlogCard from "./BlogCard";
+import FeaturedBlog from "./FeaturedBlog";
+import NewsletterSection from "./NewsletterSection";
+import { useGetBlogsQuery, useAddBlogMutation } from "../../../redux/api/blogApiSlice";
 
+const categories = [
+    { id: "ALL", label: "All Posts", color: "from-primary to-primary/80" },
+    { id: "OUTSOURCING", label: "Outsourcing", color: "from-primary/80 to-pink-500" },
+    { id: "TECHNOLOGY", label: "Technology", color: "from-primary to-cyan-500" },
+    { id: "CASE STUDY", label: "Case Studies", color: "from-emerald-500 to-teal-500" },
+    { id: "SECURITY", label: "Security", color: "from-amber-500 to-orange-500" },
+];
 
 const Blogs = () => {
-    // Professional Outsourcing/Project Management Blog Data
-    const posts = [
-        {
-            id: 1,
-            title: "Evaluating Data Entry Outsourcing: Cost vs Quality for your Business",
-            excerpt: "Learn how to strike the perfect balance between cost-efficiency and data accuracy when choosing an outsourcing partner for large-scale data projects.",
-            category: "OUTSOURCING",
-            author: "Global Projects Team",
-            date: "Feb 20, 2026",
-            readTime: "6 min read",
-            image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=800&auto=format&fit=crop",
-            featured: true
-        },
-        {
-            id: 2,
-            title: "The Future of Back-Office Management in 2026",
-            excerpt: "Automation and human expertise are joining forces. See how Global Projects is leading the shift in telecommunication support.",
-            category: "TECHNOLOGY",
-            date: "Feb 18, 2026",
-            readTime: "4 min read",
-            image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=600&auto=format&fit=crop",
-        },
-        {
-            id: 3,
-            title: "Case Study: Reducing KYC Turnaround by 40%",
-            excerpt: "How our dedicated chat support team helped a top-tier bank streamline their client verification process across 5 countries.",
-            category: "CASE STUDY",
-            date: "Feb 15, 2026",
-            readTime: "8 min read",
-            image: "https://images.unsplash.com/photo-1454165833767-027ffea9e77b?q=80&w=600&auto=format&fit=crop",
-        },
-        {
-            id: 4,
-            title: "Data Security Standards in Remote Operations",
-            excerpt: "Essential protocols for maintaining high integrity and confidentiality in outsourced data handling and client records.",
-            category: "SECURITY",
-            date: "Feb 12, 2026",
-            readTime: "5 min read",
-            image: "https://images.unsplash.com/photo-1563986768609-322da13575f3?q=80&w=600&auto=format&fit=crop",
-        },
-    ];
+    const [showEditor, setShowEditor] = useState(false);
+    const [activeCategory, setActiveCategory] = useState("ALL");
+    const [searchTerm, setSearchTerm] = useState("");
+    const [currentPage, setCurrentPage] = useState(1);
+    const [expandedPostId, setExpandedPostId] = useState(null);
+    const postsPerPage = 9;
 
-    const featuredPost = posts[0];
-    const recentPosts = posts.slice(1);
+    const {
+        data: postsResponse,
+        isLoading,
+        isError,
+        error,
+    } = useGetBlogsQuery();
+
+    const [addBlog, { isLoading: adding }] = useAddBlogMutation();
+
+    const posts = postsResponse?.data || postsResponse?.blogs || postsResponse || [];
+
+    const filteredPosts = useMemo(() => {
+        return posts.filter((post) => {
+            const matchesCategory = activeCategory === "ALL" || post.category === activeCategory;
+            const matchesSearch = 
+                post.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                post.excerpt?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                post.author?.name?.toLowerCase().includes(searchTerm.toLowerCase());
+            return matchesCategory && matchesSearch;
+        });
+    }, [activeCategory, posts, searchTerm]);
+
+    const totalPages = Math.ceil(filteredPosts.length / postsPerPage);
+    const currentPosts = filteredPosts.slice(
+        (currentPage - 1) * postsPerPage,
+        currentPage * postsPerPage
+    );
+
+    const featuredPost = currentPosts[0];
+    const recentPosts = currentPosts.slice(1);
+
+    const handleCreateBlog = async (blogData) => {
+        try {
+            await addBlog(blogData).unwrap();
+            setShowEditor(false);
+        } catch (err) {
+            alert(err?.data?.message || "Failed to create blog");
+        }
+    };
+
+    const handleExpandPost = (postId) => {
+        setExpandedPostId(expandedPostId === postId ? null : postId);
+    };
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-app-bg text-text-primary flex items-center justify-center">
+                <div className="text-center">
+                    <div className="w-20 h-20 border-4 border-primary/30 border-t-primary rounded-full animate-spin mx-auto mb-4"></div>
+                    <p className="text-text-muted">Loading amazing content...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (isError) {
+        return (
+            <div className="min-h-screen bg-app-bg text-text-primary flex items-center justify-center">
+                <div className="text-center bg-rose-500/10 border border-rose-500/20 rounded-2xl p-8 max-w-md">
+                    <div className="w-20 h-20 bg-rose-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <X className="w-10 h-10 text-rose-400" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-text-primary mb-2">Oops! Something went wrong</h2>
+                    <p className="text-text-muted">{error?.data?.message || "Error loading blogs"}</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
-        <div className="space-y-12 animate-fade-in text-text-primary pt-6 pb-20">
-            {/* Header */}
-            <div className="flex flex-col md:flex-row justify-between items-end border-b border-dark-600/50 pb-8">
-                <div>
-                    <h1 className="text-4xl font-extrabold tracking-tighter mb-2">Knowledge Hub</h1>
-                    <p className="text-text-muted font-medium text-sm italic">Industry insights, operational updates and strategy guides.</p>
-                </div>
-                <div className="flex gap-2 mt-6 md:mt-0">
-                    {['ALL', 'STRATEGY', 'OPPS', 'TECH', 'SECURITY'].map((cat) => (
-                        <button key={cat} className="px-4 py-2 rounded-full bg-dark-800 border border-dark-600 text-[10px] font-black tracking-widest text-text-muted hover:text-primary hover:border-primary/50 hover:bg-primary/5 transition-all">
-                            {cat}
-                        </button>
-                    ))}
-                </div>
-            </div>
+        <div className="min-h-screen bg-app-bg text-text-primary">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
 
-            {/* Featured Post */}
-            <div className="relative group cursor-pointer h-[500px] rounded-[2.5rem] overflow-hidden shadow-2xl transition-all duration-500 hover:shadow-primary/10">
-                <img
-                    src={featuredPost.image}
-                    alt={featuredPost.title}
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105 opacity-40 group-hover:opacity-60"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-dark-950 via-dark-900/60 to-transparent" />
-
-                <div className="absolute bottom-0 left-0 p-10 md:p-14 space-y-6 max-w-4xl z-10">
-                    <div className="flex items-center gap-4">
-                        <span className="px-3 py-1.5 bg-primary text-white rounded-lg text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/20">
-                            {featuredPost.category}
-                        </span>
-                        <div className="flex items-center gap-4 text-text-secondary text-[11px] font-bold">
-                            <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5 text-primary" /> {featuredPost.date}</span>
-                            <span className="w-1 h-1 bg-dark-600 rounded-full"></span>
-                            <span className="flex items-center gap-1.5"><Clock className="w-3.5 h-3.5 text-primary" /> {featuredPost.readTime}</span>
-                        </div>
+                {/* Header Section */}
+                <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex flex-col lg:flex-row justify-between lg:items-end gap-6"
+                >
+                    <div>
+                        <h1 className="text-5xl font-extrabold bg-gradient-to-r from-primary to-yellow bg-clip-text text-transparent">
+                            Knowledge Hub
+                        </h1>
+                        <p className="text-text-muted text-sm mt-2 flex items-center gap-2">
+                            <TrendingUp className="w-4 h-4" />
+                            Industry insights, operational updates and strategy guides
+                        </p>
                     </div>
 
-                    <h2 className="text-4xl md:text-5xl font-black leading-tight group-hover:text-primary transition-colors duration-300">
-                        {featuredPost.title}
-                    </h2>
+                    <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setShowEditor(true)}
+                        className="group relative px-6 py-3 bg-gradient-to-r from-primary to-primary/80 rounded-xl font-semibold text-white shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all duration-300 flex items-center gap-2"
+                    >
+                        <PlusCircle className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
+                        Create New Blog
+                    </motion.button>
+                </motion.div>
 
-                    <p className="text-text-secondary text-base md:text-lg line-clamp-2 max-w-2xl font-medium">
-                        {featuredPost.excerpt}
-                    </p>
-
-                    <div className="flex items-center gap-6 pt-6">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-dark-700 border border-dark-600 flex items-center justify-center font-black text-xs text-primary group-hover:bg-primary group-hover:text-white transition-all shadow-lg shadow-black/50">GP</div>
-                            <div>
-                                <p className="text-xs font-black text-text-primary">{featuredPost.author}</p>
-                                <p className="text-[10px] text-text-muted font-bold uppercase tracking-widest">Global Insights Lead</p>
-                            </div>
-                        </div>
-                        <button className="flex items-center gap-2 text-xs font-black text-primary hover:text-text-primary transition-all group/btn uppercase tracking-widest border-b-2 border-primary/20 hover:border-primary pb-1">
-                            Continue Reading <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-2 transition-transform" />
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            {/* Grid Stories */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {recentPosts.map((post) => (
-                    <div key={post.id} className="bg-dark-800 rounded-[2rem] overflow-hidden border border-dark-600/50 hover:border-primary/40 hover:shadow-2xl transition-all duration-500 group cursor-pointer flex flex-col h-full shadow-lg">
-                        <div className="relative h-60 overflow-hidden">
-                            <img
-                                src={post.image}
-                                alt={post.title}
-                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-70 group-hover:opacity-100"
+                {/* Search and Filter Bar */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                    className="bg-dark-800/50 backdrop-blur-xl border border-dark-600/30 rounded-2xl p-4"
+                >
+                    <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+                        {/* Search */}
+                        <div className="relative flex-1 w-full">
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-text-muted" />
+                            <input
+                                type="text"
+                                placeholder="Search posts by title, content or author..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full bg-dark-900 border border-dark-600/50 rounded-xl pl-10 pr-4 py-3 text-text-primary placeholder-text-muted/50 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
                             />
-                            <div className="absolute top-6 left-6 bg-dark-900/90 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/5 text-[10px] font-black uppercase tracking-widest text-primary shadow-2xl">
-                                {post.category}
-                            </div>
                         </div>
 
-                        <div className="p-8 flex flex-col flex-1 space-y-5">
-                            <div className="flex items-center justify-between text-[10px] font-black text-text-muted uppercase tracking-[0.15em]">
-                                <span className="flex items-center gap-2"><Calendar className="w-3 h-3" /> {post.date}</span>
-                                <span className="flex items-center gap-2"><Clock className="w-4 h-4" /> {post.readTime}</span>
-                            </div>
-
-                            <h3 className="text-2xl font-bold leading-tight group-hover:text-primary transition-colors line-clamp-2">
-                                {post.title}
-                            </h3>
-
-                            <p className="text-sm text-text-secondary line-clamp-3 leading-relaxed font-medium">
-                                {post.excerpt}
-                            </p>
-
-                            <div className="mt-auto pt-6 border-t border-dark-700/50 flex items-center justify-between text-text-muted">
-                                <div className="flex gap-4">
-                                    <Heart className="w-4 h-4 hover:text-red-500 transition-colors" />
-                                    <MessageCircle className="w-4 h-4 hover:text-text-primary transition-colors" />
-                                </div>
-                                <Share2 className="w-4 h-4 hover:text-text-primary transition-colors" />
-                            </div>
+                        {/* Category Filters */}
+                        <div className="flex flex-wrap gap-2">
+                            {categories.map((cat) => (
+                                <motion.button
+                                    key={cat.id}
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={() => {
+                                        setActiveCategory(cat.id);
+                                        setExpandedPostId(null);
+                                    }}
+                                    className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+                                        activeCategory === cat.id
+                                            ? `bg-gradient-to-r ${cat.color} text-white shadow-lg`
+                                            : "bg-dark-900 border border-dark-600/50 text-text-muted hover:border-primary/50 hover:text-text-primary"
+                                    }`}
+                                >
+                                    {cat.label}
+                                </motion.button>
+                            ))}
                         </div>
                     </div>
-                ))}
-            </div>
+                </motion.div>
 
-            {/* Newsletter Simulation */}
-            <div className="mt-12 bg-gradient-to-r from-primary/10 to-transparent p-12 rounded-[2.5rem] border border-primary/20 flex flex-col md:flex-row items-center justify-between gap-8 relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-8 opacity-5">
-                    <TrendingUp className="w-64 h-64 text-primary" />
-                </div>
-                <div className="relative z-10">
-                    <h3 className="text-3xl font-black tracking-tighter mb-2">Get the latest insights.</h3>
-                    <p className="text-text-secondary font-medium">Join 500+ managers receiving our weekly industry analysis.</p>
-                </div>
-                <div className="flex w-full md:w-auto gap-3 relative z-10">
-                    <input
-                        type="email"
-                        placeholder="Enter your email"
-                        className="bg-dark-900/50 border border-dark-600 rounded-xl px-6 py-3.5 text-sm focus:outline-none focus:border-primary flex-1 md:w-80 shadow-inner"
-                    />
-                    <button className="bg-primary hover:bg-primary-dark text-white px-8 py-3.5 rounded-xl font-black text-xs uppercase tracking-widest shadow-lg shadow-primary/20 transition-all active:scale-95">
-                        Subscribe
-                    </button>
-                </div>
+                {/* Stats Bar */}
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className="grid grid-cols-2 md:grid-cols-4 gap-4"
+                >
+                    {[
+                        { label: 'Total Posts', value: posts.length, icon: Eye, color: 'from-primary to-primary/80' },
+                        { label: 'Categories', value: categories.length - 1, icon: Tag, color: 'from-primary/80 to-pink-500' },
+                        { label: 'Authors', value: new Set(posts.map(p => p.author?.name)).size, icon: User, color: 'from-emerald-500 to-teal-500' },
+                        { label: 'This Month', value: posts.filter(p => new Date(p.createdAt) > new Date(Date.now() - 30*24*60*60*1000)).length, icon: Calendar, color: 'from-amber-500 to-orange-500' },
+                    ].map((stat, idx) => (
+                        <div key={idx} className="relative group">
+                            <div className={`absolute inset-0 bg-gradient-to-r ${stat.color} rounded-2xl opacity-20 group-hover:opacity-30 transition-opacity blur-xl`} />
+                            <div className="relative bg-dark-800/50 backdrop-blur-xl border border-dark-600/30 rounded-2xl p-4 overflow-hidden">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <p className="text-text-muted text-xs">{stat.label}</p>
+                                        <p className="text-2xl font-bold text-text-primary mt-1">{stat.value}</p>
+                                    </div>
+                                    <div className={`p-2 bg-gradient-to-r ${stat.color} rounded-lg opacity-80`}>
+                                        <stat.icon className="w-4 h-4 text-white" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </motion.div>
+
+                {/* Content Section */}
+                <AnimatePresence mode="wait">
+                    {filteredPosts.length === 0 ? (
+                        <motion.div
+                            key="empty"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            className="text-center py-20"
+                        >
+                            <div className="w-24 h-24 bg-dark-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <Search className="w-12 h-12 text-text-muted/50" />
+                            </div>
+                            <h3 className="text-2xl font-bold text-text-primary mb-2">No posts found</h3>
+                            <p className="text-text-muted">Try adjusting your search or filter</p>
+                        </motion.div>
+                    ) : (
+                        <motion.div
+                            key="content"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="space-y-12"
+                        >
+                            {/* Featured Post */}
+                            {featuredPost && (
+                                <FeaturedBlog 
+                                    post={featuredPost} 
+                                    isExpanded={expandedPostId === featuredPost._id}
+                                    onExpand={() => handleExpandPost(featuredPost._id)}
+                                />
+                            )}
+
+                            {/* Blog Grid */}
+                            {recentPosts.length > 0 && (
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr">
+                                    <AnimatePresence>
+                                        {recentPosts.map((post, index) => (
+                                            <BlogCard 
+                                                key={post._id} 
+                                                post={post} 
+                                                index={index}
+                                                isExpanded={expandedPostId === post._id}
+                                                onExpand={() => handleExpandPost(post._id)}
+                                            />
+                                        ))}
+                                    </AnimatePresence>
+                                </div>
+                            )}
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="flex items-center justify-between bg-dark-800/50 backdrop-blur-xl border border-dark-600/30 rounded-2xl p-4"
+                    >
+                        <div className="text-sm text-text-muted">
+                            Showing {(currentPage - 1) * postsPerPage + 1} to {Math.min(currentPage * postsPerPage, filteredPosts.length)} of {filteredPosts.length} posts
+                        </div>
+                        
+                        <div className="flex gap-2">
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => {
+                                    setCurrentPage(prev => Math.max(1, prev - 1));
+                                    setExpandedPostId(null);
+                                }}
+                                disabled={currentPage === 1}
+                                className={`p-2 rounded-lg border transition-colors ${
+                                    currentPage === 1 
+                                        ? "border-dark-600/30 bg-dark-800/50 text-text-muted/50 cursor-not-allowed" 
+                                        : "border-dark-600/30 bg-dark-800 hover:bg-dark-700 text-text-muted"
+                                }`}
+                            >
+                                <ChevronLeft className="w-5 h-5" />
+                            </motion.button>
+                            
+                            {[...Array(totalPages)].map((_, i) => (
+                                <motion.button
+                                    key={i}
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    onClick={() => {
+                                        setCurrentPage(i + 1);
+                                        setExpandedPostId(null);
+                                    }}
+                                    className={`px-4 py-2 rounded-lg text-sm transition-colors ${
+                                        currentPage === i + 1
+                                            ? "bg-gradient-to-r from-primary to-primary/80 text-white"
+                                            : "bg-dark-800 text-text-muted hover:bg-dark-700"
+                                    }`}
+                                >
+                                    {i + 1}
+                                </motion.button>
+                            ))}
+                            
+                            <motion.button
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                onClick={() => {
+                                    setCurrentPage(prev => Math.min(totalPages, prev + 1));
+                                    setExpandedPostId(null);
+                                }}
+                                disabled={currentPage === totalPages}
+                                className={`p-2 rounded-lg border transition-colors ${
+                                    currentPage === totalPages 
+                                        ? "border-dark-600/30 bg-dark-800/50 text-text-muted/50 cursor-not-allowed" 
+                                        : "border-dark-600/30 bg-dark-800 hover:bg-dark-700 text-text-muted"
+                                }`}
+                            >
+                                <ChevronRight className="w-5 h-5" />
+                            </motion.button>
+                        </div>
+                    </motion.div>
+                )}
+
+                {/* Newsletter Section */}
+                <NewsletterSection />
+
+                {/* Blog Editor Modal */}
+                <AnimatePresence>
+                    {showEditor && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
+                            onClick={() => setShowEditor(false)}
+                        >
+                            <motion.div
+                                initial={{ scale: 0.9, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                exit={{ scale: 0.9, opacity: 0 }}
+                                className="w-full max-w-4xl"
+                                onClick={e => e.stopPropagation()}
+                            >
+                                <BlogEditor
+                                    onClose={() => setShowEditor(false)}
+                                    onSubmit={handleCreateBlog}
+                                    loading={adding}
+                                />
+                            </motion.div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
             </div>
         </div>
     );

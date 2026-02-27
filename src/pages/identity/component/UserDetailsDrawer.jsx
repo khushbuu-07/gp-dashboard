@@ -9,8 +9,8 @@ const UserDetailsDrawer = ({ user, onClose, onEdit, onReset }) => {
     if (!user) return null;
 
     const roleColors = {
-        admin: "from-purple-500 to-pink-500",
-        sales: "from-blue-500 to-cyan-500",
+        admin: "from-primary/80 to-pink-500",
+        sales: "from-primary to-cyan-500",
         pm: "from-emerald-500 to-teal-500",
         finance: "from-amber-500 to-orange-500",
     };
@@ -33,7 +33,7 @@ const UserDetailsDrawer = ({ user, onClose, onEdit, onReset }) => {
                 animate={{ x: 0 }}
                 exit={{ x: "100%" }}
                 transition={{ type: "spring", damping: 30 }}
-                className="w-full max-w-md bg-gradient-to-br from-slate-800 to-slate-900 border-l border-slate-700 shadow-2xl overflow-y-auto"
+                className="w-full max-w-md bg-gradient-to-br from-slate-800 to-slate-900 border-l border-dark-600/30 shadow-2xl overflow-y-auto"
                 onClick={e => e.stopPropagation()}
             >
                 {/* Header with gradient */}
@@ -54,7 +54,7 @@ const UserDetailsDrawer = ({ user, onClose, onEdit, onReset }) => {
 
                 {/* User Avatar */}
                 <div className="flex justify-center -mt-12 mb-6">
-                    <div className="w-24 h-24 rounded-full bg-gradient-to-r from-slate-700 to-slate-800 border-4 border-slate-700 flex items-center justify-center shadow-xl">
+                    <div className="w-24 h-24 rounded-full bg-gradient-to-r from-slate-700 to-slate-800 border-4 border-dark-600/30 flex items-center justify-center shadow-xl">
                         <span className="text-3xl font-bold text-white">
                             {user.name.charAt(0)}
                         </span>
@@ -123,10 +123,10 @@ const UserDetailsDrawer = ({ user, onClose, onEdit, onReset }) => {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex gap-3 pt-4 border-t border-slate-700">
+                    <div className="flex gap-3 pt-4 border-t border-dark-600/30">
                         <button 
                             onClick={onEdit}
-                            className="flex-1 px-4 py-3 bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2"
+                            className="flex-1 px-4 py-3 bg-primary/20 hover:bg-primary/30 text-blue-400 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2"
                         >
                             <Edit2 className="w-4 h-4" />
                             Edit
