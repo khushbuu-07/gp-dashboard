@@ -44,6 +44,7 @@ const statusIcons = {
 };
 
 const normalizeStatus = (status) => String(status || "active").toLowerCase();
+const isValidObjectId = (value) => /^[a-fA-F0-9]{24}$/.test(String(value || "").trim());
 
 const ClientsData = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -134,7 +135,7 @@ const ClientsData = () => {
         projectCode: formData.projectCode,
         location: formData.location,
         date: formData.dateOfCall || new Date().toISOString(),
-        attendedBy: formData.attendedBy || "",
+        attendedBy: isValidObjectId(formData.attendedBy) ? formData.attendedBy.trim() : null,
         status: normalizeStatus(formData.status),
         remarks: formData.remarks,
       }).unwrap();

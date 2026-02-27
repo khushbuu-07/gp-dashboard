@@ -445,8 +445,8 @@ const ManageLeads = () => {
                     <td className="px-4 py-3 text-slate-300">
                       {lead.date ? new Date(lead.date).toLocaleDateString() : "-"}
                     </td>
-                    <td className="px-4 py-3">
-                      <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition">
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <div className="flex gap-2">
                         <button onClick={() => handleEdit(lead)}>
                           <Edit className="w-4 text-slate-300" />
                         </button>
