@@ -5,7 +5,7 @@ import {
     Calendar, User, Tag, Eye, 
     ChevronLeft, ChevronRight, X
 } from "lucide-react";
-import BlogEditor from "./BlogEditor";
+import BlogEditor from "./Blogeditor";
 import BlogCard from "./BlogCard";
 import FeaturedBlog from "./FeaturedBlog";
 import NewsletterSection from "./NewsletterSection";
