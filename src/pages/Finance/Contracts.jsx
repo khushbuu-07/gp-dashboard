@@ -37,7 +37,7 @@ const emptyForm = {
   status: "ACTIVE",
 };
 
-const ManageContracts = () => {
+const Contracts = () => {
   const [form, setForm] = useState(emptyForm);
   const [open, setOpen] = useState(false);
   const [page, setPage] = useState(1);
@@ -376,4 +376,4 @@ const ManageContracts = () => {
   );
 };
 
-export default ManageContracts;
+export default Contracts;
