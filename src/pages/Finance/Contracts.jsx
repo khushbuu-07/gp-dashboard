@@ -3,105 +3,197 @@ import {
   Plus,
   Edit,
   Trash2,
-  FileText,
   Activity,
   CheckCircle,
-  IndianRupee,
   ChevronLeft,
   ChevronRight,
+  Loader2,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  useGetCentersQuery,
+  useAddCenterMutation,
+  useUpdateCenterMutation,
+  useDeleteCenterMutation,
+} from "../../redux/api/centerApiSlice";
+import { toast } from "../../utils/toast";
 
-/* =======================
-   STATUS COLORS (Unified)
-======================= */
 const statusColors = {
-  Active: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-  Completed: "bg-primary/10 text-blue-400 border-primary/20",
-  Cancelled: "bg-rose-500/10 text-rose-400 border-rose-500/20",
+  ACTIVE: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+  INACTIVE: "bg-rose-500/10 text-rose-400 border-rose-500/20",
 };
 
 const emptyForm = {
-  contractId: "",
-  client: "",
-  value: "",
-  paymentTerms: "",
-  startDate: "",
-  endDate: "",
-  status: "Active",
+  name: "",
+  code: "",
+  email: "",
+  phone: "",
+  address: "",
+  city: "",
+  state: "",
+  pincode: "",
+  type: "",
+  capacity: "",
+  status: "ACTIVE",
 };
 
 const ManageContracts = () => {
-  const [contracts, setContracts] = useState([]);
   const [form, setForm] = useState(emptyForm);
   const [open, setOpen] = useState(false);
   const [page, setPage] = useState(1);
+  const [editingId, setEditingId] = useState(null);
   const entries = 10;
 
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const { data, isLoading, isError, error, refetch } = useGetCentersQuery({
+    page,
+    limit: entries,
+  });
+  const [addCenter, { isLoading: isAdding }] = useAddCenterMutation();
+  const [updateCenter, { isLoading: isUpdating }] = useUpdateCenterMutation();
+  const [deleteCenter, { isLoading: isDeleting }] = useDeleteCenterMutation();
 
-  const handleSubmit = (e) => {
+  const centers = useMemo(() => {
+    if (Array.isArray(data?.data?.centers)) return data.data.centers;
+    if (Array.isArray(data?.message?.centers)) return data.message.centers;
+    if (Array.isArray(data?.centers)) return data.centers;
+    if (Array.isArray(data?.data)) return data.data;
+    if (Array.isArray(data?.message)) return data.message;
+    if (Array.isArray(data)) return data;
+    return [];
+  }, [data]);
+
+  const pagination = useMemo(() => {
+    const fromApi = data?.data?.pagination || data?.message?.pagination || data?.pagination;
+    if (fromApi) return fromApi;
+    return {
+      page,
+      limit: entries,
+      total: centers.length,
+      pages: Math.max(1, Math.ceil(centers.length / entries)),
+    };
+  }, [data, page, entries, centers.length]);
+
+  const handleChange = (e) => setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setContracts([{ id: Date.now(), ...form }, ...contracts]);
-    setForm(emptyForm);
-    setOpen(false);
+    const payload = {
+      name: form.name,
+      code: form.code,
+      email: form.email,
+      phone: form.phone,
+      address: form.address,
+      city: form.city,
+      state: form.state,
+      pincode: form.pincode,
+      type: form.type,
+      capacity: Number(form.capacity || 0),
+      status: String(form.status || "ACTIVE").toUpperCase(),
+    };
+
+    try {
+      if (editingId) {
+        await updateCenter({ id: editingId, data: payload }).unwrap();
+        toast.success("Center updated successfully");
+      } else {
+        await addCenter(payload).unwrap();
+        toast.success("Center created successfully");
+        setPage(1);
+      }
+      await refetch();
+      setForm(emptyForm);
+      setEditingId(null);
+      setOpen(false);
+    } catch (err) {
+      toast.error(err?.data?.message || "Failed to save center");
+    }
+  };
+
+  const handleEdit = (center) => {
+    setEditingId(center._id);
+    setForm({
+      name: center.name || "",
+      code: center.code || "",
+      email: center.email || "",
+      phone: center.phone || "",
+      address: center.address || "",
+      city: center.city || "",
+      state: center.state || "",
+      pincode: center.pincode || "",
+      type: center.type || "",
+      capacity: String(center.capacity ?? ""),
+      status: String(center.status || (center.isActive ? "ACTIVE" : "INACTIVE")).toUpperCase(),
+    });
+    setOpen(true);
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Delete this center?")) return;
+    try {
+      await deleteCenter(id).unwrap();
+      toast.success("Center deleted successfully");
+      await refetch();
+    } catch (err) {
+      toast.error(err?.data?.message || "Failed to delete center");
+    }
   };
 
   const stats = useMemo(() => {
+    const active = centers.filter(
+      (c) => String(c.status || (c.isActive ? "ACTIVE" : "INACTIVE")).toUpperCase() === "ACTIVE",
+    ).length;
+    const inactive = centers.filter(
+      (c) => String(c.status || (c.isActive ? "ACTIVE" : "INACTIVE")).toUpperCase() !== "ACTIVE",
+    ).length;
+    const totalCapacity = centers.reduce((sum, c) => sum + Number(c.capacity || 0), 0);
     return {
-      total: contracts.length,
-      active: contracts.filter((c) => c.status === "Active").length,
-      completed: contracts.filter((c) => c.status === "Completed").length,
-      totalValue: contracts.reduce((s, c) => s + Number(c.value || 0), 0),
+      total: pagination.total || 0,
+      active,
+      inactive,
+      totalCapacity,
     };
-  }, [contracts]);
-
-  const totalPages = Math.ceil(contracts.length / entries);
-  const paginated = contracts.slice(
-    (page - 1) * entries,
-    page * entries
-  );
+  }, [centers, pagination.total]);
 
   return (
-    <div className="space-y-8 pt-6 animate-fade-in text-text-primary pb-10">
-
-      {/* HEADER */}
-      <div className="flex justify-between items-end border-b border-dark-600 pb-6">
+    <div className="w-full space-y-6 sm:space-y-8 pt-4 sm:pt-6 animate-fade-in text-text-primary pb-8 sm:pb-10">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-dark-600 pb-5 sm:pb-6">
         <div>
-          <h1 className="text-4xl font-extrabold tracking-tight mb-1">
-            Contract Management
+          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight mb-1">
+            Center Management
           </h1>
-          <p className="text-text-muted text-sm">
-            Centralized control of all active and completed contracts
-          </p>
+          <p className="text-text-muted text-xs sm:text-sm">Centralized control of all centers</p>
         </div>
 
         <button
-          onClick={() => setOpen(!open)}
+          onClick={() => {
+            if (open) {
+              setOpen(false);
+              setEditingId(null);
+              setForm(emptyForm);
+            } else {
+              setOpen(true);
+            }
+          }}
           className="flex items-center gap-2 px-5 py-2.5 bg-primary hover:bg-primary-dark text-white rounded-xl text-sm font-bold shadow-lg shadow-primary/20 transition-all active:scale-95"
         >
-          <Plus className="w-4 h-4" /> New Contract
+          <Plus className="w-4 h-4" /> {editingId ? "Edit Center" : "New Center"}
         </button>
       </div>
 
-      {/* STATS */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
         {[
-          { label: "Total Contracts", value: stats.total, icon: FileText },
-          { label: "Active", value: stats.active, icon: Activity },
-          { label: "Completed", value: stats.completed, icon: CheckCircle },
-          { label: "Total Value", value: `₹${stats.totalValue}`, icon: IndianRupee },
+          { label: "Total Centers", value: stats.total, icon: Activity },
+          { label: "Active", value: stats.active, icon: CheckCircle },
+          { label: "Inactive", value: stats.inactive, icon: Activity },
+          { label: "Total Capacity", value: stats.totalCapacity, icon: Activity },
         ].map((s, i) => (
           <div
             key={i}
-            className="bg-dark-800 p-6 rounded-3xl border border-dark-600/50 shadow-xl"
+            className="bg-dark-800 p-6 rounded-3xl border border-dark-600/50 shadow-md shadow-black/10"
           >
             <div className="flex justify-between items-center">
               <div>
-                <p className="text-xs uppercase tracking-wider text-text-muted">
-                  {s.label}
-                </p>
+                <p className="text-xs uppercase tracking-wider text-text-muted">{s.label}</p>
                 <h3 className="text-3xl font-black mt-1">{s.value}</h3>
               </div>
               <div className="p-3 bg-primary/10 rounded-xl text-primary">
@@ -112,7 +204,6 @@ const ManageContracts = () => {
         ))}
       </div>
 
-      {/* FORM */}
       <AnimatePresence>
         {open && (
           <motion.form
@@ -123,10 +214,16 @@ const ManageContracts = () => {
             className="bg-dark-800 p-6 rounded-3xl border border-dark-600/50 grid md:grid-cols-3 gap-4"
           >
             {[
-              ["contractId", "Contract ID"],
-              ["client", "Client Name"],
-              ["value", "Contract Value"],
-              ["paymentTerms", "Payment Terms"],
+              ["name", "Center Name"],
+              ["code", "Center Code"],
+              ["email", "Email"],
+              ["phone", "Phone"],
+              ["address", "Address"],
+              ["city", "City"],
+              ["state", "State"],
+              ["pincode", "Pincode"],
+              ["type", "Type"],
+              ["capacity", "Capacity"],
             ].map(([name, label]) => (
               <input
                 key={name}
@@ -138,34 +235,44 @@ const ManageContracts = () => {
               />
             ))}
 
-            <input type="date" name="startDate" onChange={handleChange} className="bg-dark-900 border border-dark-700 rounded-xl px-4 py-3 text-text-primary" />
-            <input type="date" name="endDate" onChange={handleChange} className="bg-dark-900 border border-dark-700 rounded-xl px-4 py-3 text-text-primary" />
-
             <select
               name="status"
               value={form.status}
               onChange={handleChange}
               className="bg-dark-900 border border-dark-700 rounded-xl px-4 py-3 text-text-primary"
             >
-              {Object.keys(statusColors).map((s) => (
-                <option key={s}>{s}</option>
-              ))}
+              <option value="ACTIVE">ACTIVE</option>
+              <option value="INACTIVE">INACTIVE</option>
             </select>
 
-            <button className="md:col-span-3 bg-primary py-3 rounded-xl text-white font-bold">
-              Save Contract
+            <button
+              disabled={isAdding || isUpdating}
+              className="md:col-span-3 bg-primary py-3 rounded-xl text-white font-bold disabled:opacity-60"
+            >
+              {isAdding || isUpdating ? "Saving..." : editingId ? "Update Center" : "Save Center"}
             </button>
           </motion.form>
         )}
       </AnimatePresence>
 
-      {/* TABLE */}
-      <div className="bg-dark-800 rounded-3xl border border-dark-600/50 overflow-x-auto shadow-xl">
-        <table className="min-w-full text-sm">
+      <div className="w-full bg-dark-800 rounded-2xl sm:rounded-3xl border border-dark-600/50 shadow-md shadow-black/10">
+        <div className="w-full overflow-x-auto">
+        <table className="w-full min-w-[1120px] text-xs sm:text-sm">
           <thead className="bg-dark-900/70">
             <tr>
-              {["Contract ID","Client","Value","Terms","Duration","Status","Actions"].map(h => (
-                <th key={h} className="px-4 py-3 text-left text-xs uppercase text-text-muted">
+              {[
+                "S.No",
+                "Name",
+                "Code",
+                "Address",
+                "Email",
+                "Phone",
+                "Capacity",
+                "Status",
+                "Created At",
+                "Actions",
+              ].map((h) => (
+                <th key={h} className="px-3 sm:px-4 py-3 text-left text-[11px] uppercase text-text-muted whitespace-nowrap">
                   {h}
                 </th>
               ))}
@@ -173,42 +280,96 @@ const ManageContracts = () => {
           </thead>
 
           <tbody className="divide-y divide-dark-700">
-            {paginated.map((c) => (
-              <tr key={c.id} className="hover:bg-dark-700/40 transition">
-                <td className="px-4 py-3">{c.contractId}</td>
-                <td className="px-4 py-3 text-text-muted">{c.client}</td>
-                <td className="px-4 py-3 text-emerald-400 font-semibold">₹{c.value}</td>
-                <td className="px-4 py-3 text-text-muted">{c.paymentTerms}</td>
-                <td className="px-4 py-3 text-text-muted">{c.startDate} – {c.endDate}</td>
-                <td className="px-4 py-3">
-                  <span className={`px-3 py-1 rounded-full text-xs border ${statusColors[c.status]}`}>
-                    {c.status}
+            {isLoading ? (
+              <tr>
+                <td colSpan={9} className="px-4 py-10 text-center text-text-muted">
+                  <span className="inline-flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Loading centers...
                   </span>
                 </td>
-                <td className="px-4 py-3 flex gap-2">
-                  <Edit className="w-4 text-text-muted hover:text-primary cursor-pointer" />
-                  <Trash2 className="w-4 text-rose-400 cursor-pointer" />
+              </tr>
+            ) : isError ? (
+              <tr>
+                <td colSpan={9} className="px-4 py-10 text-center text-rose-400">
+                  {error?.data?.message || "Failed to load centers"}
                 </td>
               </tr>
-            ))}
+            ) : centers.length === 0 ? (
+              <tr>
+                <td colSpan={9} className="py-14 text-center text-text-muted">
+                  No centers found
+                </td>
+              </tr>
+            ) : (
+              centers.map((c, idx) => {
+                const normalizedStatus = String(
+                  c.status || (c.isActive ? "ACTIVE" : "INACTIVE"),
+                ).toUpperCase();
+                return (
+                  <tr key={c._id} className="hover:bg-dark-700/40 transition">
+                    <td className="px-3 sm:px-4 py-3 whitespace-nowrap">{(page - 1) * entries + idx + 1}</td>
+                    <td className="px-3 sm:px-4 py-3 whitespace-nowrap">{c.name || "-"}</td>
+                    <td className="px-3 sm:px-4 py-3 text-text-muted whitespace-nowrap">{c.code || "-"}</td>
+                    <td className="px-3 sm:px-4 py-3 text-text-muted whitespace-nowrap">{c.address || "-"}</td>
+                    <td className="px-3 sm:px-4 py-3 text-text-muted whitespace-nowrap">{c.email || "-"}</td>
+                    <td className="px-3 sm:px-4 py-3 text-text-muted whitespace-nowrap">{c.phone || "-"}</td>
+                    <td className="px-3 sm:px-4 py-3 text-emerald-400 font-semibold whitespace-nowrap">{c.capacity ?? 0}</td>
+                    <td className="px-3 sm:px-4 py-3 whitespace-nowrap">
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs border ${
+                          statusColors[normalizedStatus] || statusColors.active
+                        }`}
+                      >
+                        {normalizedStatus}
+                      </span>
+                    </td>
+                    <td className="px-3 sm:px-4 py-3 text-text-muted whitespace-nowrap">
+                      {c.createdAt ? new Date(c.createdAt).toLocaleString() : "-"}
+                    </td>
+                    <td className="px-3 sm:px-4 py-3 whitespace-nowrap">
+                      <div className="flex gap-2">
+                        <button onClick={() => handleEdit(c)} className="cursor-pointer">
+                          <Edit className="w-4 text-text-muted hover:text-primary" />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(c._id)}
+                          className="cursor-pointer"
+                          disabled={isDeleting}
+                        >
+                          <Trash2 className="w-4 text-rose-400" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
           </tbody>
         </table>
-
-        {contracts.length === 0 && (
-          <div className="py-14 text-center text-text-muted">
-            No contracts found
-          </div>
-        )}
+        </div>
       </div>
 
-      {/* PAGINATION */}
-      <div className="flex justify-between text-text-muted text-sm">
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-0 justify-between text-text-muted text-xs sm:text-sm">
         <span>
-          Showing {(page - 1) * entries + 1} to {Math.min(page * entries, contracts.length)} of {contracts.length}
+          Showing {centers.length ? (page - 1) * entries + 1 : 0} to{" "}
+          {Math.min(page * entries, pagination.total || 0)} of {pagination.total || 0}
         </span>
         <div className="flex gap-2">
-          <ChevronLeft />
-          <ChevronRight />
+          <button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page <= 1}
+            className="p-1 rounded border border-dark-700 disabled:opacity-40"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => setPage((p) => Math.min(pagination.pages || 1, p + 1))}
+            disabled={page >= (pagination.pages || 1)}
+            className="p-1 rounded border border-dark-700 disabled:opacity-40"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
         </div>
       </div>
     </div>
